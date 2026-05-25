@@ -1,0 +1,499 @@
+<template>
+	<view class="band-detail-container">
+		<view class="detail-cover" :style="{ background: getBandGradient(band.style) }">
+			<text class="cover-emoji">{{ getBandEmoji(band.style) }}</text>
+			<view class="back-btn" @click="goBack">
+				<text>></text>
+			</view>
+		</view>
+
+		<scroll-view class="content-area" scroll-y="true">
+			<view class="detail-content">
+				<view class="band-info">
+					<text class="band-name">{{ band.name }}</text>
+					<view class="band-tags">
+						<view class="tag">
+							<text>{{ band.style }}</text>
+						</view>
+						<view class="tag">
+							<text>{{ band.member_count || 0 }}人</text>
+						</view>
+						<view class="tag" v-if="band.created_at">
+							<text>成立{{ getYear(band.created_at) }}</text>
+						</view>
+					</view>
+					<text class="band-intro" v-if="band.intro">{{ band.intro }}</text>
+				</view>
+
+				<view class="section" v-if="members.length > 0">
+					<view class="section-header">
+						<text class="section-title">乐队成员</text>
+					</view>
+					<view class="members-grid">
+						<view class="member-item" v-for="member in members" :key="member.id">
+							<view class="member-avatar" :style="{ background: getMemberGradient(member.role) }">
+								<text class="member-emoji">{{ getRoleEmoji(member.role) }}</text>
+							</view>
+							<text class="member-name">{{ member.user?.nickname || '未知' }}</text>
+							<text class="member-role">{{ member.instrument || member.role }}</text>
+						</view>
+					</view>
+				</view>
+
+				<view class="section" v-if="activities.length > 0">
+					<view class="section-header">
+						<text class="section-title">参与活动</text>
+					</view>
+					<view class="activities-list">
+						<view class="activity-item" v-for="activity in activities" :key="activity.id" @click="goToActivity(activity.id)">
+							<view class="activity-cover" :style="{ background: getActivityGradient(activity.type) }">
+								<text class="activity-emoji">{{ getActivityEmoji(activity.type) }}</text>
+							</view>
+							<view class="activity-info">
+								<text class="activity-title">{{ activity.title }}</text>
+								<view class="activity-meta">
+									<text>📅 {{ formatDate(activity.start_time) }}</text>
+									<text>{{ activity.location }}</text>
+								</view>
+							</view>
+						</view>
+					</view>
+				</view>
+			</view>
+		</scroll-view>
+
+		<view class="bottom-action">
+			<view class="action-btn secondary" @click="sendMessage">
+				<text>💌 私信</text>
+			</view>
+			<view class="action-btn primary" @click="toggleFollow">
+				<text>{{ isFollowed ? '❤️ 已关注' : '🤍 关注' }}</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, onMounted } from 'vue'
+import { bandApi, userApi } from '../../common/utils/api.uts'
+
+const bandId = ref<number>(0)
+const band = ref<any>({})
+const members = ref<any[]>([])
+const activities = ref<any[]>([])
+const isFollowed = ref(false)
+
+const getBandGradient = (style: string): string => {
+	const gradients: Record<string, string> = {
+		rock: 'linear-gradient(135deg, #e94560, #16213e)',
+		jazz: 'linear-gradient(135deg, #9b59b6, #16213e)',
+		pop: 'linear-gradient(135deg, #3498db, #16213e)',
+		folk: 'linear-gradient(135deg, #27ae60, #16213e)',
+		metal: 'linear-gradient(135deg, #34495e, #16213e)',
+		blues: 'linear-gradient(135deg, #f39c12, #16213e)'
+	}
+	return gradients[style?.toLowerCase()] || 'linear-gradient(135deg, #e94560, #16213e)'
+}
+
+const getBandEmoji = (style: string): string => {
+	const emojis: Record<string, string> = {
+		rock: '🎸',
+		jazz: '🎷',
+		pop: '🎤',
+		folk: '🎻',
+		metal: '🤘',
+		blues: '🎺'
+	}
+	return emojis[style?.toLowerCase()] || '🎵'
+}
+
+const getMemberGradient = (role: string): string => {
+	const gradients: Record<string, string> = {
+		vocal: 'linear-gradient(135deg, #e94560, #8b1a34)',
+		guitar: 'linear-gradient(135deg, #9b59b6, #8e44ad)',
+		keyboard: 'linear-gradient(135deg, #3498db, #2980b9)',
+		drum: 'linear-gradient(135deg, #27ae60, #2ecc71)'
+	}
+	return gradients[role?.toLowerCase()] || 'linear-gradient(135deg, #e94560, #8b1a34)'
+}
+
+const getRoleEmoji = (role: string): string => {
+	const emojis: Record<string, string> = {
+		vocal: '🎤',
+		guitar: '🎸',
+		keyboard: '🎹',
+		drum: '🥁',
+		bass: '🎸'
+	}
+	return emojis[role?.toLowerCase()] || '🎵'
+}
+
+const getActivityGradient = (type: string): string => {
+	const gradients: Record<string, string> = {
+		performance: 'linear-gradient(135deg, #e94560, #8b1a34)',
+		competition: 'linear-gradient(135deg, #f39c12, #e67e22)',
+		rehearsal: 'linear-gradient(135deg, #3498db, #2980b9)',
+		course: 'linear-gradient(135deg, #9b59b6, #8e44ad)'
+	}
+	return gradients[type?.toLowerCase()] || 'linear-gradient(135deg, #16213e, #0f4a8a)'
+}
+
+const getActivityEmoji = (type: string): string => {
+	const emojis: Record<string, string> = {
+		performance: '🎤',
+		competition: '🏆',
+		rehearsal: '🎹',
+		course: '📚'
+	}
+	return emojis[type?.toLowerCase()] || '🎵'
+}
+
+const getYear = (dateStr: string): string => {
+	if (!dateStr) return ''
+	const date = new Date(dateStr)
+	return date.getFullYear().toString()
+}
+
+const formatDate = (dateStr: string): string => {
+	if (!dateStr) return '待定'
+	const date = new Date(dateStr)
+	const month = date.getMonth() + 1
+	const day = date.getDate()
+	return month + '月' + day + '日'
+}
+
+const loadBandDetail = async () => {
+	try {
+		uni.showLoading({ title: '加载中..' })
+
+		const [detailRes, membersRes, activitiesRes] = await Promise.all([
+			bandApi.getDetail(bandId.value),
+			bandApi.getMembers(bandId.value),
+			bandApi.getActivities(bandId.value)
+		])
+
+		if (detailRes && detailRes.code === 1000) {
+			band.value = detailRes.data || {}
+		}
+
+		if (membersRes && membersRes.code === 1000) {
+			members.value = membersRes.data || []
+		}
+
+		if (activitiesRes && activitiesRes.code === 1000) {
+			activities.value = Array.isArray(activitiesRes.data) ? activitiesRes.data : activitiesRes.data?.list || []
+		}
+
+		checkFollowStatus()
+		uni.hideLoading()
+	} catch (e) {
+		uni.hideLoading()
+		console.error('Load band detail error:', e)
+		uni.showToast({ title: '加载失败', icon: 'none' })
+	}
+}
+
+const checkFollowStatus = async () => {
+	try {
+		isFollowed.value = false // 先重置
+		const res = await userApi.getFollows()
+		if (res && res.code === 1000 && res.data) {
+			const follows = res.data.list || res.data || []
+			// Bug修复: f.id是关注记录ID，应该检查 f.band?.id 才是乐队ID
+			const isFollowing = follows.some((f: any) => f.band?.id === bandId.value)
+			if (isFollowing) {
+				isFollowed.value = true
+			}
+		}
+	} catch (e) {
+		console.log('Check follow status error:', e)
+	}
+}
+
+const toggleFollow = async () => {
+	try {
+		if (isFollowed.value) {
+			// 已关注 -> 取消关注
+			const unfollowRes = await bandApi.unfollow(bandId.value)
+			if (unfollowRes && (unfollowRes.code === 1000 || unfollowRes.code === 1001)) {
+				isFollowed.value = false
+				uni.showToast({ title: '已取消关注', icon: 'success' })
+			} else {
+				uni.showToast({ title: '操作失败', icon: 'none' })
+			}
+		} else {
+			// 未关注 -> 添加关注
+			const followRes = await bandApi.follow(bandId.value)
+			if (followRes && (followRes.code === 1000 || followRes.code === 1001)) {
+				isFollowed.value = true
+				uni.showToast({ title: '关注成功', icon: 'success' })
+			} else {
+				uni.showToast({ title: '操作失败', icon: 'none' })
+			}
+		}
+	} catch (e) {
+		console.error('Toggle follow error:', e)
+		uni.showToast({ title: '操作失败', icon: 'none' })
+	}
+}
+
+const sendMessage = () => {
+	uni.showToast({ title: '私信功能开发中', icon: 'none' })
+}
+
+const goToActivity = (id: number) => {
+	uni.navigateTo({ url: '/pages/activity/detail?id=' + id })
+}
+
+const goBack = () => {
+	uni.navigateBack()
+}
+
+onMounted(() => {
+	const pages = getCurrentPages()
+	if (pages.length > 0) {
+		const currentPage = pages[pages.length - 1] as any
+		if (currentPage.options && currentPage.options.id) {
+			bandId.value = parseInt(currentPage.options.id)
+		}
+	}
+
+	if (bandId.value) {
+		loadBandDetail()
+		checkFollowStatus()
+	} else {
+		uni.showToast({ title: '参数错误', icon: 'none' })
+		uni.navigateBack()
+	}
+})
+</script>
+
+<style>
+.band-detail-container {
+	width: 750rpx;
+	min-height: 100vh;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: column;
+}
+
+.detail-cover {
+	width: 750rpx;
+	height: 360rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+.cover-emoji {
+	font-size: 100rpx;
+}
+
+.back-btn {
+	position: absolute;
+	top: 24rpx;
+	left: 28rpx;
+	width: 64rpx;
+	height: 64rpx;
+	background-color: rgba(0, 0, 0, 0.4);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.back-btn text {
+	font-size: 32rpx;
+	color: #ffffff;
+}
+
+.content-area {
+	flex: 1;
+	width: 750rpx;
+	padding-bottom: 120rpx;
+}
+
+.detail-content {
+	padding: 32rpx 28rpx;
+}
+
+.band-info {
+	margin-bottom: 32rpx;
+}
+
+.band-name {
+	font-size: 40rpx;
+	font-weight: 700;
+	color: #ffffff;
+	display: block;
+}
+
+.band-tags {
+	display: flex;
+	flex-direction: row;
+	margin-top: 16rpx;
+}
+
+.tag {
+	background-color: rgba(233, 69, 96, 0.15);
+	color: #e94560;
+	font-size: 22rpx;
+	padding: 8rpx 20rpx;
+	border-radius: 20rpx;
+	margin-right: 16rpx;
+}
+
+.band-intro {
+	font-size: 28rpx;
+	color: #a0a0c0;
+	line-height: 1.6;
+	margin-top: 16rpx;
+	display: block;
+}
+
+.section {
+	margin-bottom: 32rpx;
+}
+
+.section-header {
+	margin-bottom: 20rpx;
+}
+
+.section-title {
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #ffffff;
+}
+
+.members-grid {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 28rpx;
+}
+
+.member-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.member-avatar {
+	width: 80rpx;
+	height: 80rpx;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.member-emoji {
+	font-size: 32rpx;
+}
+
+.member-name {
+	font-size: 20rpx;
+	color: #a0a0c0;
+	margin-top: 10rpx;
+}
+
+.member-role {
+	font-size: 18rpx;
+	color: #e94560;
+	margin-top: 4rpx;
+}
+
+.activities-list {
+	display: flex;
+	flex-direction: column;
+	gap: 24rpx;
+}
+
+.activity-item {
+	display: flex;
+	flex-direction: row;
+	background-color: #16213e;
+	border-radius: 24rpx;
+	overflow: hidden;
+	border: 1rpx solid #1a1a4e;
+}
+
+.activity-cover {
+	width: 120rpx;
+	height: 120rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.activity-emoji {
+	font-size: 40rpx;
+}
+
+.activity-info {
+	flex: 1;
+	padding: 20rpx;
+}
+
+.activity-title {
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #ffffff;
+	display: block;
+}
+
+.activity-meta {
+	display: flex;
+	flex-direction: row;
+	margin-top: 10rpx;
+}
+
+.activity-meta text {
+	font-size: 22rpx;
+	color: #a0a0c0;
+	margin-right: 20rpx;
+}
+
+.bottom-action {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	padding: 24rpx 28rpx;
+	background-color: #0f0f23;
+	border-top: 1rpx solid #1a1a3e;
+	display: flex;
+	flex-direction: row;
+	gap: 20rpx;
+}
+
+.action-btn {
+	flex: 1;
+	border-radius: 40rpx;
+	padding: 24rpx;
+	text-align: center;
+}
+
+.action-btn text {
+	font-size: 28rpx;
+	font-weight: 600;
+}
+
+.action-btn.secondary {
+	background-color: #16213e;
+	border: 1rpx solid #e94560;
+}
+
+.action-btn.secondary text {
+	color: #e94560;
+}
+
+.action-btn.primary {
+	background-color: #e94560;
+}
+
+.action-btn.primary text {
+	color: #ffffff;
+}
+</style>

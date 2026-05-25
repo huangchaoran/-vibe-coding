@@ -39,9 +39,10 @@ npm-debug.log*
 # Temp files
 *.tmp
 *.temp
-detail.uvue
-qc
-start
+/qc
+/start
+/detail.uvue
+
 
 # Uvue build
 unpackage/
