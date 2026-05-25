@@ -63,7 +63,7 @@ class BandService {
         
         list = list.map(band => {
           const bandData = band.toJSON();
-          bandData.is_followed = followedIds.has(band.id);
+          bandData.isFollowed = followedIds.has(band.id);
           return bandData;
         });
       }
@@ -112,7 +112,7 @@ class BandService {
         'SELECT id FROM follows WHERE follower_id = ? AND following_id = ?',
         { replacements: [userId, id], type: sequelize.QueryTypes.SELECT }
       );
-      result.is_followed = !!followed;
+      result.isFollowed = !!followed;
     }
 
     return result;
@@ -215,7 +215,7 @@ class BandService {
           nickname: f.owner_nickname,
           avatar: f.owner_avatar,
         } : null,
-        is_followed: true,
+        isFollowed: true,
       })),
       pagination: meta,
     };

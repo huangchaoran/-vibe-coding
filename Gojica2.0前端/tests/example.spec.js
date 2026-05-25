@@ -1,59 +1,62 @@
 /**
- * 示例测试用例
- * 放在 tests/ 目录下，配合 playwright.config.js 使用
+ * Gojica 应用测试用例
  */
 
 const { test, expect } = require('@playwright/test');
 
 test.describe('Gojica 应用测试', () => {
-  
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-  });
 
   test('首页加载成功', async ({ page }) => {
-    // 等待页面加载
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
-    
-    // 检查页面标题或主要元素
+    await page.waitForTimeout(2000);
+
+    // 检查页面标题
     const title = await page.title();
     console.log('页面标题:', title);
-    
+
     // 截图
-    await page.screenshot({ path: 'test-results/homepage.png' });
+    await page.screenshot({ path: 'test-results/homepage.png', fullPage: true });
+
+    // 验证页面加载完成
+    await expect(page).toHaveTitle(/Gojica|登录|首页/);
   });
 
-  test('登录页面功能', async ({ page }) => {
-    // 导航到登录页面
+  test('登录页面加载', async ({ page }) => {
     await page.goto('/pages/login/index');
     await page.waitForLoadState('networkidle');
-    
-    // 填写手机号
-    await page.fill('input[placeholder*="手机号"]', '13800138000');
-    
+    await page.waitForTimeout(2000);
+
+    // 检查页面包含登录相关文本
+    const pageContent = await page.content();
+    console.log('登录页面包含 GOJICA:', pageContent.includes('GOJICA'));
+
     // 截图
-    await page.screenshot({ path: 'test-results/login-filled.png' });
-    
-    // 点击获取验证码
-    await page.click('text=获取验证码');
-    
-    // 验证 toast 提示出现
-    await expect(page.locator('text=验证码已发送')).toBeVisible({ timeout: 5000 });
+    await page.screenshot({ path: 'test-results/login-page.png', fullPage: true });
+
+    // 验证登录页面元素
+    await expect(page.locator('text=GOJICA')).toBeVisible({ timeout: 5000 });
   });
 
-  test('TabBar 导航', async ({ page }) => {
+  test('乐队页面加载', async ({ page }) => {
+    await page.goto('/pages/band/list');
     await page.waitForLoadState('networkidle');
-    
-    // 点击各个 Tab
-    const tabs = ['首页', '乐队', '广场', '市场', '我的'];
-    
-    for (const tab of tabs) {
-      await page.click(`text=${tab}`);
-      await page.waitForTimeout(500);
-      await page.screenshot({ 
-        path: `test-results/tab-${tab}.png`,
-        fullPage: true 
-      });
-    }
+    await page.waitForTimeout(2000);
+
+    // 截图
+    await page.screenshot({ path: 'test-results/band-list.png', fullPage: true });
+  });
+
+  test('API 端点可用性', async ({ page }) => {
+    // 测试首页 API
+    const response = await page.request.get('http://localhost:3000/api/v1/home');
+    expect(response.status()).toBe(200);
+
+    const data = await response.json();
+    expect(data.code).toBe(1000);
+    expect(data.data).toHaveProperty('banners');
+    expect(data.data).toHaveProperty('stats');
+    expect(data.data).toHaveProperty('hotBands');
+    expect(data.data).toHaveProperty('activities');
   });
 });

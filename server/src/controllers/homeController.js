@@ -107,7 +107,7 @@ const getBands = async (req, res) => {
 
     bands = bands.map(band => {
       const bandData = band.toJSON();
-      bandData.is_followed = followedIds.has(band.id);
+      bandData.isFollowed = followedIds.has(band.id);
       return bandData;
     });
   }

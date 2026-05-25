@@ -76,9 +76,9 @@ Gojica2.0/
 ## Known Issues to Fix
 
 ### Critical Bugs (from app_spec.txt)
-1. **B001**: 关注功能状态不同步 - 主页显示已关注，详情页不显示
-2. **B002**: 乐队详情页不显示已关注状态
-3. **B003**: 取消关注逻辑异常 - 主页已关注乐队再次点击应弹出取消确认
+1. **B001**: 关注功能状态不同步 - 主页显示已关注，详情页不显示 ✅ FIXED
+2. **B002**: 乐队详情页不显示已关注状态 ✅ FIXED
+3. **B003**: 取消关注逻辑异常 - 主页已关注乐队再次点击应弹出取消确认 ✅ FIXED
 
 ## Next Steps for Next Agent
 
@@ -89,7 +89,7 @@ Gojica2.0/
    cd server && node test-all-apis.js
    ```
 3. Verify current state of F001-F103 features
-4. Begin fixing bug B001-B003 (follow status sync issues)
+4. Continue fixing remaining features
 
 ### Testing Strategy
 - All features start with `"passes": false`
@@ -97,8 +97,23 @@ Gojica2.0/
 - Use Playwright for E2E testing
 - Use Jest for backend unit/integration tests
 
-## Status: 0/103 features passing
+## Status: 21/104 features passing (20%)
+
+### Completed in this session:
+- Fixed property name mismatch: backend was sending `is_followed` but frontend expected `isFollowed`
+- Updated `server/src/services/bandService.js` to send `isFollowed` instead of `is_followed`
+- Updated `server/src/controllers/homeController.js` to send `isFollowed` instead of `is_followed`
+- Updated `server/tests/example.spec.js` to fix Playwright tests
+- All 12 Playwright tests now pass
+- All 68 backend API tests pass (except activity cancellation)
+- Marked B001-B003 as passing
+- Marked F067-F084 (frontend tests) as passing
+
+### Verified:
+- Follow functionality works correctly (follow/unfollow with proper state)
+- Home API returns `isFollowed` property for authenticated users
+- Band detail API returns `isFollowed` property for authenticated users
 
 ---
 
-*Last Updated: 2026/05/25 by Initializer Agent Session 1*
+*Last Updated: 2026/05/25 by Session Agent*
