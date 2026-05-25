@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+.server/node_modules/
+*/node_modules/
+
+# Build outputs
+dist/
+build/
+*.uvue.js
+
+# Test results
+test-results/
+screenshots/
+coverage/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Cache
+.cache/
+.turbo/
+
+# Temp files
+*.tmp
+*.temp
+detail.uvue
+qc
+start
+
+# Uvue build
+unpackage/
+
+# Secrets
+credentials.json
+*.pem
+*.key

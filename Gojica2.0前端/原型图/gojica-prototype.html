@@ -1,0 +1,1767 @@
+C:\Users\Administrator\Desktop\千早爱音给我助教\Gojica2.0\Gojica2.0前端\原型图\gojica-prototype.html<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gojica 音乐社交平台 - 原型图</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif; background: #1a1a2e; min-height: 100vh; }
+
+  /* ===== 布局 ===== */
+  .prototype-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px;
+    gap: 50px;
+  }
+  .page-title {
+    color: #e94560;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .page-subtitle {
+    color: #a0a0c0;
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  /* ===== 导航标签 ===== */
+  .nav-tabs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  .nav-tab {
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s;
+    background: #16213e;
+    color: #a0a0c0;
+  }
+  .nav-tab.active, .nav-tab:hover {
+    background: #e94560;
+    color: #fff;
+  }
+
+  /* ===== 手机壳 ===== */
+  .phone-row {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .phone-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .phone-label {
+    color: #e94560;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .phone-shell {
+    width: 320px;
+    background: #0f0f23;
+    border-radius: 40px;
+    border: 2.5px solid #e94560;
+    box-shadow: 0 0 30px rgba(233,69,96,0.25), 0 20px 60px rgba(0,0,0,0.6);
+    overflow: hidden;
+    position: relative;
+  }
+  .phone-notch {
+    width: 100%;
+    height: 28px;
+    background: #0f0f23;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #1a1a3e;
+  }
+  .notch-dot { width: 60px; height: 6px; background: #1a1a3e; border-radius: 3px; }
+  .phone-status-bar {
+    width: 100%;
+    height: 22px;
+    background: #0f0f23;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+    font-size: 10px;
+    color: #a0a0c0;
+  }
+  .phone-screen {
+    width: 100%;
+    min-height: 580px;
+    background: #0d0d1f;
+    overflow: hidden;
+    position: relative;
+  }
+  .phone-home-indicator {
+    width: 100%;
+    height: 30px;
+    background: #0f0f23;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .home-bar { width: 100px; height: 4px; background: #333; border-radius: 2px; }
+
+  /* ===== 通用组件 ===== */
+  .screen { display: none; width: 100%; }
+  .screen.active { display: block; }
+
+  /* 顶部导航 */
+  .top-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #0d0d1f;
+    border-bottom: 1px solid #1a1a3e;
+  }
+  .top-nav-title { color: #fff; font-size: 16px; font-weight: 700; }
+  .top-nav-icon { color: #a0a0c0; font-size: 18px; cursor: pointer; }
+  .top-nav-left { display: flex; align-items: center; gap: 8px; }
+
+  /* 搜索栏 */
+  .search-bar {
+    margin: 10px 14px;
+    background: #1a1a3e;
+    border-radius: 20px;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #5a5a8a;
+    font-size: 13px;
+  }
+
+  /* 轮播图 */
+  .banner {
+    margin: 10px 14px;
+    height: 150px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #e94560 0%, #8b1a34 50%, #16213e 100%);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    padding: 14px;
+  }
+  .banner-text { color: #fff; }
+  .banner-title { font-size: 18px; font-weight: 700; }
+  .banner-sub { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 3px; }
+  .banner-dots {
+    position: absolute;
+    bottom: 10px;
+    right: 14px;
+    display: flex;
+    gap: 4px;
+  }
+  .banner-dot { width: 6px; height: 6px; background: rgba(255,255,255,0.4); border-radius: 3px; }
+  .banner-dot.active { width: 14px; background: #fff; }
+  .banner-badge {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    backdrop-filter: blur(4px);
+  }
+
+  /* 统计卡片 */
+  .stats-row {
+    display: flex;
+    gap: 8px;
+    padding: 10px 14px;
+  }
+  .stat-card {
+    flex: 1;
+    background: #16213e;
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+    border: 1px solid #1a1a4e;
+  }
+  .stat-num { color: #e94560; font-size: 20px; font-weight: 700; }
+  .stat-label { color: #a0a0c0; font-size: 11px; margin-top: 3px; }
+
+  /* 标题行 */
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px 8px;
+  }
+  .section-title { color: #fff; font-size: 15px; font-weight: 700; }
+  .section-more { color: #e94560; font-size: 12px; }
+
+  /* 标签筛选 */
+  .filter-tags {
+    display: flex;
+    gap: 8px;
+    padding: 0 14px 10px;
+    overflow-x: auto;
+  }
+  .filter-tag {
+    background: #16213e;
+    color: #a0a0c0;
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 14px;
+    white-space: nowrap;
+    border: 1px solid #1a1a4e;
+  }
+  .filter-tag.active { background: #e94560; color: #fff; border-color: #e94560; }
+
+  /* 乐队横向卡片 */
+  .band-scroll {
+    display: flex;
+    gap: 12px;
+    padding: 0 14px 14px;
+    overflow-x: auto;
+  }
+  .band-card-h {
+    min-width: 110px;
+    background: #16213e;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #1a1a4e;
+  }
+  .band-avatar {
+    width: 100%;
+    height: 80px;
+    background: linear-gradient(135deg, #e94560, #8b1a34);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+  }
+  .band-info { padding: 8px; }
+  .band-name { color: #fff; font-size: 12px; font-weight: 600; }
+  .band-style { color: #a0a0c0; font-size: 10px; margin-top: 2px; }
+  .band-follow-btn {
+    margin-top: 6px;
+    width: 100%;
+    background: #e94560;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 4px 0;
+    font-size: 11px;
+    cursor: pointer;
+  }
+
+  /* 活动列表卡片 */
+  .activity-list { padding: 0 14px 80px; display: flex; flex-direction: column; gap: 12px; }
+  .activity-card {
+    background: #16213e;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #1a1a4e;
+  }
+  .activity-cover {
+    width: 100%;
+    height: 110px;
+    background: linear-gradient(135deg, #1a1a3e, #e94560);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    position: relative;
+  }
+  .activity-status {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #e94560;
+    color: #fff;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 8px;
+  }
+  .activity-status.green { background: #27ae60; }
+  .activity-cover-2 { background: linear-gradient(135deg, #16213e, #0f4a8a); }
+  .activity-cover-3 { background: linear-gradient(135deg, #3d1a4e, #8b1a34); }
+  .activity-body { padding: 12px; }
+  .activity-title { color: #fff; font-size: 14px; font-weight: 600; }
+  .activity-meta { display: flex; align-items: center; gap: 12px; margin-top: 6px; }
+  .activity-meta-item { color: #a0a0c0; font-size: 11px; display: flex; align-items: center; gap: 3px; }
+  .activity-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+  .activity-price { color: #e94560; font-size: 14px; font-weight: 600; }
+  .activity-price span { font-size: 11px; color: #a0a0c0; margin-left: 4px; }
+  .btn-signup {
+    background: #e94560;
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 6px 16px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .btn-signup.disabled { background: #333; color: #666; }
+
+  /* 底部导航 */
+  .bottom-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: #0f0f23;
+    border-top: 1px solid #1a1a3e;
+    display: flex;
+    align-items: center;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+  }
+  .nav-icon { font-size: 20px; color: #5a5a8a; }
+  .nav-text { font-size: 10px; color: #5a5a8a; }
+  .nav-item.active .nav-icon { color: #e94560; }
+  .nav-item.active .nav-text { color: #e94560; }
+
+  /* 列表通用行 */
+  .list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #1a1a3e;
+  }
+  .list-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e94560, #8b1a34);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .list-avatar.square { border-radius: 10px; }
+  .list-info { flex: 1; }
+  .list-name { color: #fff; font-size: 14px; font-weight: 600; }
+  .list-sub { color: #a0a0c0; font-size: 12px; margin-top: 3px; }
+  .list-right { text-align: right; }
+  .list-price { color: #e94560; font-size: 14px; font-weight: 600; }
+  .list-tag {
+    background: #16213e;
+    color: #e94560;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 8px;
+    border: 1px solid #e94560;
+  }
+
+  /* 详情页 */
+  .detail-cover {
+    width: 100%;
+    height: 180px;
+    background: linear-gradient(135deg, #e94560, #16213e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 50px;
+    position: relative;
+  }
+  .detail-back {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    width: 32px;
+    height: 32px;
+    background: rgba(0,0,0,0.4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .detail-body { padding: 16px 14px; }
+  .detail-title { color: #fff; font-size: 20px; font-weight: 700; }
+  .detail-tags { display: flex; gap: 8px; margin-top: 10px; }
+  .detail-tag { background: rgba(233,69,96,0.15); color: #e94560; font-size: 11px; padding: 4px 10px; border-radius: 10px; }
+  .detail-desc { color: #a0a0c0; font-size: 13px; line-height: 1.6; margin-top: 12px; }
+  .detail-info-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; color: #a0a0c0; font-size: 13px; }
+  .detail-divider { height: 1px; background: #1a1a3e; margin: 14px 0; }
+
+  /* 成员列表 */
+  .member-row { display: flex; gap: 14px; padding: 0 14px; flex-wrap: wrap; }
+  .member-item { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .member-ava { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #e94560, #8b1a34); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .member-name { color: #a0a0c0; font-size: 10px; }
+  .member-role { color: #e94560; font-size: 9px; }
+
+  /* 底部操作栏 */
+  .bottom-action {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 12px 14px;
+    background: #0f0f23;
+    border-top: 1px solid #1a1a3e;
+    display: flex;
+    gap: 10px;
+  }
+  .btn-secondary {
+    flex: 1;
+    background: #16213e;
+    color: #e94560;
+    border: 1px solid #e94560;
+    border-radius: 20px;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+  }
+  .btn-primary {
+    flex: 2;
+    background: #e94560;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  /* 帖子动态 */
+  .post-card {
+    background: #16213e;
+    margin: 0 14px 12px;
+    border-radius: 14px;
+    padding: 14px;
+    border: 1px solid #1a1a3e;
+  }
+  .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .post-ava { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #e94560, #8b1a34); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .post-author { color: #fff; font-size: 13px; font-weight: 600; }
+  .post-time { color: #5a5a8a; font-size: 11px; }
+  .post-content { color: #c0c0e0; font-size: 13px; line-height: 1.5; margin-bottom: 10px; }
+  .post-images { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
+  .post-img { height: 80px; background: linear-gradient(135deg, #1a1a3e, #e94560); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+  .post-actions { display: flex; gap: 18px; }
+  .post-action { color: #5a5a8a; font-size: 12px; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+  .post-action.liked { color: #e94560; }
+
+  /* 商品卡片 */
+  .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 14px 80px; }
+  .product-card { background: #16213e; border-radius: 14px; overflow: hidden; border: 1px solid #1a1a4e; }
+  .product-img { width: 100%; height: 120px; background: linear-gradient(135deg, #1a1a3e, #8b1a34); display: flex; align-items: center; justify-content: center; font-size: 36px; position: relative; }
+  .product-fav { position: absolute; top: 8px; right: 8px; color: #e94560; font-size: 16px; }
+  .product-body { padding: 10px; }
+  .product-title { color: #fff; font-size: 12px; font-weight: 600; }
+  .product-price { color: #e94560; font-size: 15px; font-weight: 700; margin-top: 5px; }
+  .product-orig { color: #5a5a8a; font-size: 11px; text-decoration: line-through; }
+  .product-seller { color: #a0a0c0; font-size: 11px; margin-top: 4px; }
+
+  /* 招募卡片 */
+  .recruit-card {
+    margin: 0 14px 12px;
+    background: #16213e;
+    border-radius: 14px;
+    padding: 14px;
+    border: 1px solid #1a1a4e;
+  }
+  .recruit-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .recruit-band-ava { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #e94560, #8b1a34); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .recruit-title { color: #fff; font-size: 14px; font-weight: 700; }
+  .recruit-band { color: #a0a0c0; font-size: 12px; }
+  .recruit-tags { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+  .recruit-tag { background: rgba(233,69,96,0.15); color: #e94560; font-size: 11px; padding: 3px 10px; border-radius: 10px; }
+  .recruit-desc { color: #a0a0c0; font-size: 12px; line-height: 1.5; }
+  .recruit-footer { display: flex; justify-content: flex-end; margin-top: 10px; }
+  .btn-apply { background: #e94560; color: #fff; border: none; border-radius: 14px; padding: 6px 18px; font-size: 12px; cursor: pointer; }
+
+  /* 个人中心 */
+  .profile-header {
+    background: linear-gradient(180deg, #1a0a14 0%, #0d0d1f 100%);
+    padding: 20px 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .profile-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e94560, #8b1a34);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    border: 2.5px solid #e94560;
+    flex-shrink: 0;
+  }
+  .profile-info { flex: 1; }
+  .profile-name { color: #fff; font-size: 18px; font-weight: 700; }
+  .profile-bio { color: #a0a0c0; font-size: 12px; margin-top: 4px; }
+  .profile-badges { display: flex; gap: 6px; margin-top: 8px; }
+  .badge { background: rgba(233,69,96,0.15); color: #e94560; font-size: 10px; padding: 3px 8px; border-radius: 8px; border: 1px solid rgba(233,69,96,0.3); }
+  .profile-stats { display: flex; justify-content: space-around; padding: 14px; background: #16213e; margin: 0 14px; border-radius: 14px; }
+  .pstat { text-align: center; }
+  .pstat-num { color: #fff; font-size: 18px; font-weight: 700; }
+  .pstat-label { color: #a0a0c0; font-size: 11px; margin-top: 2px; }
+  .menu-section { margin: 14px 14px 0; }
+  .menu-title { color: #5a5a8a; font-size: 12px; margin-bottom: 8px; letter-spacing: 0.5px; }
+  .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .menu-item {
+    background: #16213e;
+    border-radius: 12px;
+    padding: 14px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    border: 1px solid #1a1a4e;
+  }
+  .menu-icon { font-size: 20px; width: 26px; text-align: center; }
+  .menu-text { color: #c0c0e0; font-size: 13px; }
+  .menu-list { background: #16213e; border-radius: 14px; overflow: hidden; }
+  .menu-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 14px;
+    border-bottom: 1px solid #1a1a3e;
+    cursor: pointer;
+  }
+  .menu-row:last-child { border-bottom: none; }
+  .menu-row-icon { font-size: 18px; width: 24px; }
+  .menu-row-text { color: #c0c0e0; font-size: 14px; flex: 1; }
+  .menu-row-arrow { color: #5a5a8a; font-size: 14px; }
+
+  /* 登录页 */
+  .login-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 24px;
+    min-height: 580px;
+    background: #0d0d1f;
+  }
+  .login-logo { font-size: 54px; margin-bottom: 14px; }
+  .login-name { color: #e94560; font-size: 28px; font-weight: 800; letter-spacing: 3px; }
+  .login-slogan { color: #a0a0c0; font-size: 13px; margin-top: 6px; margin-bottom: 40px; }
+  .login-form { width: 100%; }
+  .login-input {
+    width: 100%;
+    background: #16213e;
+    border: 1px solid #1a1a4e;
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: #fff;
+    font-size: 14px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .login-input span { color: #a0a0c0; font-size: 13px; }
+  .btn-wechat {
+    width: 100%;
+    background: #07c160;
+    color: #fff;
+    border: none;
+    border-radius: 24px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .login-divider { display: flex; align-items: center; gap: 10px; margin: 16px 0; }
+  .login-line { flex: 1; height: 1px; background: #1a1a3e; }
+  .login-divider-text { color: #5a5a8a; font-size: 12px; }
+  .btn-dev {
+    width: 100%;
+    background: transparent;
+    color: #a0a0c0;
+    border: 1px solid #1a1a4e;
+    border-radius: 24px;
+    padding: 12px;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  /* 搜索结果页 */
+  .search-result-section { margin-bottom: 16px; }
+  .search-result-title { color: #5a5a8a; font-size: 12px; padding: 8px 14px; letter-spacing: 0.5px; }
+
+  /* 浮动发布按钮 */
+  .fab {
+    position: absolute;
+    bottom: 70px;
+    right: 16px;
+    width: 46px;
+    height: 46px;
+    background: #e94560;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(233,69,96,0.5);
+    cursor: pointer;
+  }
+
+  /* 空状态 */
+  .empty-state { display: flex; flex-direction: column; align-items: center; padding: 40px 20px; color: #5a5a8a; gap: 10px; }
+  .empty-icon { font-size: 40px; }
+  .empty-text { font-size: 13px; }
+
+  /* 滚动区域 */
+  .scroll-area { overflow-y: auto; height: calc(580px - 60px); }
+  .scroll-area-full { overflow-y: auto; height: 580px; }
+
+  /* 页脚说明 */
+  .footer-note {
+    color: #5a5a8a;
+    font-size: 12px;
+    text-align: center;
+    padding: 10px;
+    border-top: 1px solid #1a1a3e;
+  }
+</style>
+</head>
+<body>
+<div class="prototype-container">
+
+  <!-- ===== 标题 ===== -->
+  <div>
+    <div class="page-title">🎸 Gojica 原型图</div>
+    <div class="page-subtitle">音乐社交平台 · 小程序界面设计稿 · v1.0.0</div>
+    <div class="nav-tabs" id="mainNav">
+      <button class="nav-tab active" onclick="showGroup('g1',this)">登录 & 首页</button>
+      <button class="nav-tab" onclick="showGroup('g2',this)">乐队模块</button>
+      <button class="nav-tab" onclick="showGroup('g3',this)">活动模块</button>
+      <button class="nav-tab" onclick="showGroup('g4',this)">招募 & 商品</button>
+      <button class="nav-tab" onclick="showGroup('g5',this)">动态广场</button>
+      <button class="nav-tab" onclick="showGroup('g6',this)">个人中心</button>
+      <button class="nav-tab" onclick="showGroup('g7',this)">搜索页</button>
+    </div>
+  </div>
+
+  <!-- ===== GROUP 1: 登录 & 首页 ===== -->
+  <div id="g1" class="phone-row">
+
+    <!-- 登录页 -->
+    <div class="phone-wrap">
+      <div class="phone-label">登录页</div>
+      <div class="phone-shell">
+        <div class="phone-notch"><div class="notch-dot"></div></div>
+        <div class="phone-status-bar"><span>9:41</span><span>●●●</span><span>🔋</span></div>
+        <div class="phone-screen">
+          <div class="login-screen">
+            <div class="login-logo">🎸</div>
+            <div class="login-name">GOJICA</div>
+            <div class="login-slogan">发现音乐·连接人脉·玩转乐圈</div>
+            <div class="login-form">
+              <div class="login-input"><span>📱</span><span>输入手机号</span></div>
+              <div class="login-input"><span>🔐</span><span>输入验证码</span></div>
+              <button class="btn-wechat">
+                <span>💬</span> 微信一键登录
+              </button>
+              <div class="login-divider">
+                <div class="login-line"></div>
+                <div class="login-divider-text">或</div>
+                <div class="login-line"></div>
+              </div>
+              <div class="btn-dev">开发模式登录（调试）</div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-home-indicator"><div class="home-bar"></div></div>
+      </div>
+    </div>
+
+    <!-- 首页 -->
+    <div class="phone-wrap">
+      <div class="phone-label">首页</div>
+      <div class="phone-shell">
+        <div class="phone-notch"><div class="notch-dot"></div></div>
+        <div class="phone-status-bar"><span>9:41</span><span>●●●</span><span>🔋</span></div>
+        <div class="phone-screen" style="position:relative;">
+          <div class="scroll-area">
+            <div class="top-nav">
+              <div class="top-nav-left">
+                <div class="top-nav-title">🎸 Gojica</div>
+              </div>
+              <div style="display:flex;gap:14px;">
+                <span class="top-nav-icon">🔔</span>
+                <span class="top-nav-icon">🔍</span>
+              </div>
+            </div>
+
+            <!-- 搜索栏 -->
+            <div class="search-bar">🔍 搜索乐队、活动、商品...</div>
+
+            <!-- 轮播图 -->
+            <div class="banner">
+              <div>
+                <div class="banner-title">周末Live House 音乐节</div>
+                <div class="banner-sub">5月10日 · 北京 · 限量100席</div>
+              </div>
+              <div class="banner-badge">🎵 活动推荐</div>
+              <div class="banner-dots">
+                <div class="banner-dot active"></div>
+                <div class="banner-dot"></div>
+                <div class="banner-dot"></div>
+              </div>
+            </div>
+
+            <!-- 统计 -->
+            <div class="stats-row">
+              <div class="stat-card">
+                <div class="stat-num">2.8k</div>
+                <div class="stat-label">乐队</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-num">1.2k</div>
+                <div class="stat-label">活动</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-num">8.6k</div>
+                <div class="stat-label">音乐人</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-num">320</div>
+                <div class="stat-label">招募中</div>
+              </div>
+            </div>
+
+            <!-- 热门乐队 -->
+            <div class="section-header">
+              <div class="section-title">🔥 热门乐队</div>
+              <div class="section-more">查看全部 ›</div>
+            </div>
+            <div class="band-scroll">
+              <div class="band-card-h">
+                <div class="band-avatar">🎸</div>
+                <div class="band-info">
+                  <div class="band-name">暗夜摇滚团</div>
+                  <div class="band-style">Rock · 4人</div>
+                  <button class="band-follow-btn">+ 关注</button>
+                </div>
+              </div>
+              <div class="band-card-h">
+                <div class="band-avatar" style="background:linear-gradient(135deg,#0f4a8a,#1a1a3e)">🥁</div>
+                <div class="band-info">
+                  <div class="band-name">节拍工厂</div>
+                  <div class="band-style">Jazz · 5人</div>
+                  <button class="band-follow-btn" style="background:#16213e;color:#e94560;border:1px solid #e94560;">已关注</button>
+                </div>
+              </div>
+              <div class="band-card-h">
+                <div class="band-avatar" style="background:linear-gradient(135deg,#3d1a4e,#8b1a34)">🎹</div>
+                <div class="band-info">
+                  <div class="band-name">紫色幻想</div>
+                  <div class="band-style">Pop · 3人</div>
+                  <button class="band-follow-btn">+ 关注</button>
+                </div>
+              </div>
+              <div class="band-card-h">
+                <div class="band-avatar" style="background:linear-gradient(135deg,#1a3e1a,#0a4a0a)">🎺</div>
+                <div class="band-info">
+                  <div class="band-name">绿洲乐团</div>
+                  <div class="band-style">Folk · 4人</div>
+                  <button class="band-follow-btn">+ 关注</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 近期活动 -->
+            <div class="section-header">
+              <div class="section-title">🎉 近期活动</div>
+              <div class="section-more">查看全部 ›</div>
+            </div>
+            <div class="activity-list" style="padding-bottom:10px;">
+              <div class="activity-card">
+                <div class="activity-cover">🎤
+                  <div class="activity-status">招募中</div>
+                </div>
+                <div class="activity-body">
+                  <div class="activity-title">五月Live House 音乐节</div>
+                  <div class="activity-meta">
+                    <div class="activity-meta-item">📅 05-10</div>
+                    <div class="activity-meta-item">📍 北京三里屯</div>
+                  </div>
+                  <div class="activity-footer">
+                    <div><div class="activity-price">免费<span>· 50/100人已报名</span></div></div>
+                    <button class="btn-signup">立即报名</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 底部导航 -->
+          <div class="bottom-nav">
+            <div class="nav-item active"><div class="nav-icon">🏠</div><div class="nav-text">首页</div></div>
+            <div class="nav-item"><div class="nav-icon">🎸</div><div class="nav-text">乐队</div></div>
+            <div class="nav-item"><div class="nav-icon">✨</div><div class="nav-text">广场</div></div>
+            <div class="nav-item"><div class="nav-icon">🛒</div><div class="nav-text">市场</div></div>
+            <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-text">我的</div></div>
+          </div>
+        </div>
+        <div class="phone-home-indicator"><div class="home-bar"></div></div>
+      </div>
+    </div>
+
+  </div><!-- /g1 -->
+
+  <!-- ===== GROUP 2: 乐队模块 ===== -->
+  <div id="g2" class="phone-row" style="display:none;">
+
+    <!-- 乐队列表 -->
+    <div class="phone-wrap">
+      <div class="phone-label">乐队列表</div>
+      <div class="phone-shell">
+        <div class="phone-notch"><div class="notch-dot"></div></div>
+        <div class="phone-status-bar"><span>9:41</span><span>●●●</span><span>🔋</span></div>
+        <div class="phone-screen" style="position:relative;">
+          <div class="scroll-area">
+            <div class="top-nav">
+              <div class="top-nav-title">🎸 乐队</div>
+              <div style="display:flex;gap:14px;">
+                <span class="top-nav-icon">🔍</span>
+                <span class="top-nav-icon">+</span>
+              </div>
+            </div>
+            <div class="filter-tags">
+              <div class="filter-tag active">全部</div>
+              <div class="filter-tag">Rock</div>
+              <div class="filter-tag">Jazz</div>
+              <div class="filter-tag">Pop</div>
+              <div class="filter-tag">Folk</div>
+              <div class="filter-tag">Metal</div>
+            </div>
+            <div class="list-item">
+              <div class="list-avatar square">🎸</div>
+              <div class="list-info">
+                <div class="list-name">暗夜摇滚团</div>
+                <div class="list-sub">Rock · 4名成员 · 已关注 42 人</div>
+              </div>
+              <div><div class="list-tag">Rock</div></div>
+            </div>
+            <div class="list-item">
+              <div class="list-avatar square" style="background:linear-gradient(135deg,#0f4a8a,#1a1a3e)">🥁</div>
+              <div class="list-info">
+                <div class="list-name">节拍工厂</div>
+                <div class="list-sub">Jazz · 5名成员 · 已关注 87 人</div>
+              </div>
+              <div><div class="list-tag" style="color:#0f4a8a;border-color:#0f4a8a;">Jazz</div></div>
+            </div>
+            <div class="list-item">
+              <div class="list-avatar square" style="background:linear-gradient(135deg,#3d1a4e,#8b1a34)">🎹</div>
+              <div class="list-info">
+                <div class="list-name">紫色幻想</div>
+                <div class="list-sub">Pop · 3名成员 · 已关注 156 人</div>
+              </div>
+              <div><div class="list-tag" style="color:#8b1a34;border-color:#8b1a34;">Pop</div></div>
+            </div>
+            <div class="list-item">
+              <div class="list-avatar square" style="background:linear-gradient(135deg,#1a3e1a,#0a4a0a)">🎺</div>
+              <div class="list-info">
+                <div class="list-name">绿洲乐团</div>
+                <div class="list-sub">Folk · 4名成员 · 已关注 63 人</div>
+              </div>
+              <div><div class="list-tag" style="color:#1a3e1a;border-color:#1a3e1a;">Folk</div></div>
+            </div>
+            <div class="list-item">
+              <div class="list-avatar square" style="background:linear-gradient(135deg,#4e1a1a,#8b3400)">🎵</div>
+              <div class="list-info">
+                <div class="list-name">钢铁意志</div>
+                <div class="list-sub">Metal · 5名成员 · 已关注 210 人</div>
+              </div>
+              <div><div class="list-tag" style="color:#8b3400;border-color:#8b3400;">Metal</div></div>
+            </div>
+            <div class="list-item">
+              <div class="list-avatar square" style="background:linear-gradient(135deg,#1a3a4e,#0a4a6e)">🎻</div>
+              <div class="list-info">
+                <div class="list-name">蓝调实验室</div>
+                <div class="list-sub">Blues · 3名成员 · 已关注 39 人</div>
+              </div>
+              <div><div class="list-tag" style="color:#0a4a6e;border-color:#0a4a6e;">Blues</div></div>
+            </div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-text">首页</div></div>
+            <div class="nav-item active"><div class="nav-icon">🎸</div><div class="nav-text">乐队</div></div>
+            <div class="nav-item"><div class="nav-icon">✨</div><div class="nav-text">广场</div></div>
+            <div class="nav-item"><div class="nav-icon">🛒</div><div class="nav-text">市场</div></div>
+            <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-text">我的</div></div>
+          </div>
+        </div>
+        <div class="phone-home-indicator"><div class="home-bar"></div></div>
+      </div>
+    </div>
+
+    <!-- 乐队详情 -->
+    <div class="phone-wrap">
+      <div class="phone-label">乐队详情</div>
+      <div class="phone-shell">
+        <div class="phone-notch"><div class="notch-dot"></div></div>
+        <div class="phone-status-bar"><span>9:41</span><span>●●●</span><span>🔋</span></div>
+        <div class="phone-screen" style="position:relative;">
+          <div style="overflow-y:auto;height:580px;">
+            <div class="detail-cover" style="background:linear-gradient(135deg,#e94560,#1a1a3e);">
+              🎸
+              <div class="detail-back">←</div>
+            </div>
+            <div class="detail-body">
+              <div class="detail-title">暗夜摇滚团</div>
+              <div class="detail-tags">
+                <div class="detail-tag">Rock</div>
+                <div class="detail-tag">4人</div>
+                <div class="detail-tag">成立 2022</div>
+              </div>
+              <div class="detail-desc">一支来自北京的独立摇滚乐队，专注于黑暗系摇滚风格，用音乐讲述都市夜晚的故事。</div>
+              <div class="detail-divider"></div>
+              <div class="section-title" style="color:#fff;font-size:14px;margin-bottom:12px;">🎤 乐队成员</div>
+              <div class="member-row">
+                <div class="member-item">
+                  <div class="member-ava">🎤</div>
+                  <div class="member-name">陈星宇</div>
+                  <div class="member-role">主唱</div>
+                </div>
+                <div class="member-item">
+                  <div class="member-ava" style="background:linear-gradient(135deg,#0f4a8a,#1a1a3e)">🎸</div>
+                  <div class="member-name">王磊</div>
+                  <div class="member-role">吉他</div>
+                </div>
+                <div class="member-item">
+                  <div class="member-ava" style="background:linear-gradient(135deg,#3d1a4e,#8b1a34)">🎹</div>
+                  <div class="member-name">林晓</div>
+                  <div class="member-role">键盘</div>
+                </div>
+                <div class="member-item">
+                  <div class="member-ava" style="background:linear-gradient(135deg,#1a3e1a,#0a4a0a)">🥁</div>
+                  <div class="member-name">张浩</div>
+                  <div class="member-role">鼓手</div>
+                </div>
+              </div>
+              <div class="detail-divider"></div>
+              <div class="section-title" style="color:#fff;font-size:14px;margin-bottom:12px;">🎉 参与活动</div>
+              <div class="activity-card">
+                <div class="activity-body" style="padding:12px;">
+                  <div class="activity-title">五月Live House 音乐节</div>
+                  <div class="activity-meta">
+                    <div class="activity-meta-item">📅 05-10</div>
+                    <div class="activity-meta-item">📍 北京三里屯</div>
+                  </div>
+                </div>
+              </div>
+              <div style="height:80px;"></div>
+            </div>
+          </div>
+          <div class="bottom-action">
+            <div class="btn-secondary">💌 私信</div>
+            <div class="btn-primary">❤️ 已关注</div>
+          </div>
+        </div>
+        <div class="phone-home-indicator"><div class="home-bar"></div></div>
+      </div>
+    </div>
+
+    <!-- 创建乐队 -->
+    <div class="phone-wrap">
+      <div class="phone-label">创建乐队</div>
+      <div class="phone-shell">
+        <div class="phone-notch"><div class="notch-dot"></div></div>
+        <div class="phone-status-bar"><span>9:41</span><span>●●●</span><span>🔋</span></div>
+        <div class="phone-screen">
+          <div style="overflow-y:auto;height:580px;padding-bottom:20px;">
+            <div class="top-nav">
+              <div class="top-nav-left"><span style="color:#e94560;font-size:16px;">←</span></div>
+              <div class="top-nav-title">创建乐队</div>
+              <div></div>
+            </div>
+            <!-- 头像上传 -->
+            <div style="display:flex;flex-direction:column;align-items:center;padding:20px;">
+              <div style="width:80px;height:80px;border-radius:50%;border:2px dashed #e94560;display:flex;align-items:center;justify-content:center;font-size:30px;color:#e94560;">+</div>
+              <div style="color:#a0a0c0;font-size:12px;margin-top:8px;">上传乐队头像</div>
+            </div>
+            <!-- 表单 -->
+            <div style="padding:0 14px;display:flex;flex-direction:column;gap:10px;">
+              <div style="background:#16213e;border-radius:12px;padding:14px 16px;border:1px solid #1a1a4e;">
+                <div style="color:#5a5a8a;font-size:11px;margin-bottom:6px;">乐队名称 *</div>
+                <div style="color:#fff;font-size:14px;">请输入乐队名称</div>
+              </div>
+              <div style="background:#16213e;border-radius:12px;padding:14px 16px;border:1px solid #1a1a4e;">
+                <div style="color:#5a5a8a;font-size:11px;margin-bottom:6px;">音乐风格 *</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">
+                  <div class="filter-tag active">Rock</div><div class="filter-tag">Jazz</div><div class="filter-tag">Pop</div><div class="filter-tag">Folk</div>
+                </div>
+              </div>
+              <div style="background:#16213e;border-radius:12px;padding:14px 16px;border:1px solid #1a1a4e;">
+                <div style="color:#5a5a8a;font-size:11px;margin-bottom:6px;">乐队简介</div>
+                <div style="color:#5a5a8a;font-size:13px;">介绍你们的乐队...</div>
+              </div>
+              <div style="background:#16213e;border-radius:12px;padding:14px 16px;border:1px solid #1a1a4e;">
+                <div style="color:#5a5a8a;font-size:11px;margin-bottom:6px;">所在城市</div>
+                <div style="color:#fff;font-size:13px;">北京</div>
+              </div>
+              <button class="btn-primary" style="border-radius:12px;padding:14px;margin-top:6px;">🎸 创建乐队</button>
+            </div>
+          </div>
+        </div>
+        <div class="phone-home-indicator"><div class="home-bar"></div></div>
+      </div>
+    </div>
+
+  </div><!-- /g2 -->
+
+  <!-- ===== GROUP 3: 活动模块 ===== -->
+  <div id="g3" class="phone-row" style="display:none;">
+
+    <!-- 活动列表 -->
+    <div class="phone-wrap">
+      <div class="phone-label">活动列表</div>
+      <div class="phone-shell">
+        <div class="phone-notch"><div class="notch-dot"></div></div>
+        <div class="phone-status-bar"><span>9:41</span><span>●●●</span><span>🔋</span></div>
+        <div class="phone-screen" style="position:relative;">
+          <div class="scroll-area">
+            <div class="top-nav">
+              <div class="top-nav-title">🎉 活动</div>
+              <span class="top-nav-icon">📋</span>
+            </div>
+            <div class="filter-tags">
+              <div class="filter-tag active">全部</div>
+              <div class="filter-tag">演出</div>
+              <div class="filter-tag">排练</div>
+              <div class="filter-tag">比赛</div>
+              <div class="filter-tag">课程</div>
+            </div>
+            <div class="activity-list">
+              <div class="activity-card">
+                <div class="activity-cover">🎤<div class="activity-status">招募中</div></div>
+                <div class="activity-body">
+                  <div class="activity-title">五月Live House 音乐节</div>
+                  <div class="activity-meta">
+                    <div class="activity-meta-item">📅 05-10 10:00</div>
+                    <div class="activity-meta-item">📍 北京三里屯</div>
+                  </div>
+                  <div class="activity-footer">
+                    <div class="activity-price">免费<span>· 50/100人</span></div>
+                    <button class="btn-signup">立即报名</button>
+                  </div>
+                </div>
+              </div>
+              <div class="activity-card">
+                <div class="activity-cover activity-cover-2">🎹<div class="activity-status green">进行中</div></div>
+                <div class="activity-body">
+                  <div class="activity-title">爵士乐大赏 · 初赛</div>
+                  <div class="activity-meta">
+                    <div class="activity-meta-item">📅 05-08 14:00</div>
+                    <div class="activity-meta-item">📍 上海新天地</div>
+                  </div>
+                  <div class="activity-footer">
+                    <div class="activity-price">¥50<span>· 80/80人</span></div>
+                    <button class="btn-signup disabled">已满员</button>
+                  </div>
+                </div>
+              </div>
+              <div class="activity-card">
+                <div class="activity-cover activity-cover-3">🎻<div class="activity-status">招募中</div></div>
+                <div class="activity-body">
+                  <div class="activity-title">民谣之夜 · 周末专场</div>
+                  <div class="activity-meta">
+                    <div class="activity-meta-item">📅 05-12 19:00</div>
+                    <div class="activity-meta-item">📍 成都宽窄巷子</div>
+                  </div>
+                  <div class="activity-footer">
+                    <div class="activity-price">¥30<span>· 20/60人</span></div>
+                    <button class="btn-signup">立即报名</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-text">首页</div></div>
+            <div class="nav-item"><div class="nav-icon">🎸</div><div class="nav-text">乐队</div></div>
+            <div class="nav-item"><div class="nav-icon">✨</div><div class="nav-text">广场</div></div>
+            <div class="nav-item"><div class="nav-icon">🛒</div><div class="nav-text">市场</div></div>
+            <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-text">我的</div></div>
+          </div>
+        </div>
+        <div class="phone-home-indicator"><div class="home-bar"></div></div>
+      </div>
+    </div>
+
+    <!-- 活动详情 -->
+    <div class="phone-wrap">
+      <div class="phone-label">活动详情</div>
+      <div class="phone-shell">
+        <div class="phone-notch"><div class="notch-dot"></div></div>
+        <div class="phone-status-bar"><span>9:41</span><span>●●●</span><span>🔋</span></div>
+        <div class="phone-screen" style="position:relative;">
+          <div style="overflow-y:auto;height:580px;">
+            <div class="detail-cover" style="background:linear-gradient(135deg,#e94560,#1a0a14);">
+              🎤
+              <div class="detail-back">←</div>
+              <div style="position:absolute;top:14px;right:14px;background:rgba(233,69,96,0.8);color:#fff;font-size:11px;padding:4px 10px;border-radius:10px;">招募中</div>
+            </div>
+            <div class="detail-body">
+              <div class="detail-title">五月Live House 音乐节</div>
+              <div class="detail-tags">
+                <div class="detail-tag">演出</div>
+                <div class="detail-tag">免费</div>
+                <div class="detail-tag">50/100人</div>
+              </div>
+              <div class="detail-divider"></div>
+              <div class="detail-info-row">⏰ 2026年05月10日 10:00 - 18:00</div>
+              <div class="detail-info-row">📍 北京市朝阳区三里屯酒吧街XX号</div>
+              <div class="detail-info-row">🎤 主办：暗夜摇滚团</div>
+              <div class="detail-divider"></div>
+              <div style="color:#fff;font-size:14px;font-weight:600;margin-bottom:8px;">活动介绍</div>
+              <div class="detail-desc">这是一场专为音乐人与粉丝设计的Live House盛会，汇聚北京多支独立乐队，带来精彩演出。现场设有酒水区和摄影区，欢迎各位带上好心情前来！</div>
+              <div class="detail-divider"></div>
+              <div style="color:#fff;font-size:14px;font-weight:600;margin-bottom:10px;">参与乐队</div>
+              <div class="member-row">
+                <div class="member-item"><div class="member-ava">🎸</div><div class="member-name">暗夜摇滚团</div></div>
+                <div class="member-item"><div class="member-ava" style="background:linear-gradient(135deg,#3d1a4e,#8b1a34)">🎹</div><div class="member-name">紫色幻想</div></div>
+                <div class="member-item"><div class="member-ava" style="background:linear-gradient(135deg,#1a3e1a,#0a4a0a)">🎺</div><div class="member-name">绿洲乐团</div></div>
+              </div>
+              <div style="height:80px;"></div>
+            </div>
+          </div>
+          <div class="bottom-action">
+            <div class="btn-secondary">❤️ 收藏</div>
+            <div class="btn-primary">🎟 立即报名</div>
+          </div>
+        </div>
+        <div class="phone-home-indicator"><div class="home-bar"></div></div>
+      </div>
+    </div>
+
+  </div><!-- /g3 -->
+
+  <!-- ===== GROUP 4: 招募 & 商品 ===== -->
+  <div id="g4" class="phone-row" style="display:none;">
+
+    <!-- 招募列表 -->
+    <div class="phone-wrap">
+      <div class="phone-label">招募列表</div>
+      <div class="phone-shell">
+        <div class="phone-notch"><div class="notch-dot"></div></div>
+        <div class="phone-status-bar"><span>9:41</span><span>●●●</span><span>🔋</span></div>
+        <div class="phone-screen" style="position:relative;">
+          <div class="scroll-area">
+            <div class="top-nav">
+              <div class="top-nav-title">📢 招募</div>
+              <div style="display:flex;gap:14px;"><span class="top-nav-icon">+</span></div>
+            </div>
+            <div class="filter-tags">
+              <div class="filter-tag active">全部</div>
+              <div class="filter-tag">吉他手</div>
+              <div class="filter-tag">鼓手</div>
+              <div class="filter-tag">主唱</div>
+              <div class="filter-tag">贝斯</div>
+            </div>
+            <div style="padding-bottom:70px;">
+              <div class="recruit-card">
+                <div class="recruit-header">
+                  <div class="recruit-band-ava">🎸</div>
+                  <div>
+                    <div class="recruit-title">急招吉他手</div>
+                    <div class="recruit-band">暗夜摇滚团</div>
+                  </div>
+                </div>
+                <div class="recruit-tags"><div class="recruit-tag">吉他</div><div class="recruit-tag">Rock</div><div class="recruit-tag">有演出经验</div></div>
+                <div class="recruit-desc">我们需要一位热爱摇滚的吉他手，有一定演出经验，可以尽快排练加入我们！</div>
+                <div class="recruit-footer"><button class="btn-apply">申请加入</button></div>
+              </div>
+              <div class="recruit-card">
+                <div class="recruit-header">
+                  <div class="recruit-band-ava" style="background:linear-gradient(135deg,#0f4a8a,#1a1a3e)">🥁</div>
+                  <div>
+                    <div class="recruit-title">招募鼓手 · 爵士方向</div>
+                    <div class="recruit-band">节拍工厂</div>
+                  </div>
+                </div>
+                <div class="recruit-tags"><div class="recruit-tag">鼓手</div><div class="recruit-tag">Jazz</div><div class="recruit-tag">周末排练</div></div>
+                <div class="recruit-desc">节拍工厂招募爵士鼓手一名，要求熟悉爵士节奏型，每周末可以参加排练。</div>
+                <div class="recruit-footer"><button class="btn-apply">申请加入</button></div>
+              </div>
+              <div class="recruit-card">
+                <div class="recruit-header">
+                  <div class="recruit-band-ava" style="background:linear-gradient(135deg,#3d1a4e,#8b1a34)">🎤</div>
+                  <div>
+                    <div class="recruit-title">招募女主唱</div>
+                    <div class="recruit-band">紫色幻想</div>
+                  </div>
+                </div>
+                <div class="recruit-tags"><div class="recruit-tag">主唱</div><div class="recruit-tag">Pop</div><div class="recruit-tag">女声</div></div>
+                <div class="recruit-desc">紫色幻想乐队招募女主唱，偏流行/电子风格，有录音棚经验优先。</div>
+                <div class="recruit-footer"><button class="btn-apply">申请加入</button></div>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-text">首页</div></div>
+            <div class="nav-item"><div class="nav-icon">🎸</div><div class="nav-text">乐队</div></div>
+            <div class="nav-item"><div class="nav-icon">✨</div><div class="nav-text">广场</div></div>
+            <div class="nav-item"><div class="nav-icon">🛒</div><div class="nav-text">市场</div></div>
+            <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-text">我的</div></div>
+          </div>
+        </div>
+        <div class="phone-home-indicator"><div class="home-bar"></div></div>
+      </div>
+    </div>
+
+    <!-- 商品市场 -->
+    <div class="phone-wrap">
+      <div class="phone-label">商品市场</div>
+      <div class="phone-shell">
+        <div class="phone-notch"><div class="notch-dot"></div></div>
+        <div class="phone-status-bar"><span>9:41</span><span>●●●</span><span>🔋</span></div>
+        <div class="phone-screen" style="position:relative;">
+          <div class="scroll-area">
+            <div class="top-nav">
+              <div class="top-nav-title">🛒 二手市场</div>
+              <div style="display:flex;gap:14px;"><span class="top-nav-icon">🔍</span><span class="top-nav-icon">+</span></div>
+            </div>
+            <div class="search-bar">🔍 搜索乐器、器材...</div>
+            <div class="filter-tags">
+              <div class="filter-tag active">全部</div>
+              <div class="filter-tag">吉他</div>
+              <div class="filter-tag">鼓</div>
+              <div class="filter-tag">键盘</div>
+              <div class="filter-tag">效果器</div>
+              <div class="filter-tag">其他</div>
+            </div>
+            <div class="product-grid">
+              <div class="product-card">
+                <div class="product-img">🎸<div class="product-fav">❤️</div></div>
+                <div class="product-body">
+                  <div class="product-title">Fender 电吉他 九成新</div>
+                  <div class="product-price">¥2,500</div>
+                  <div class="product-orig">原价 ¥3,000</div>
+                  <div class="product-seller">@ 王磊</div>
+                </div>
+              </div>
+              <div class="product-card">
+                <div class="product-img" style="background:linear-gradient(135deg,#1a1a3e,#0f4a8a)">🎹<div class="product-fav" style="color:#5a5a8a;">♡</div></div>
+                <div class="product-body">
+                  <div class="product-title">雅马哈电钢琴 88键</div>
+                  <div class="product-price">¥3,800</div>
+                  <div class="product-orig">原价 ¥5,200</div>
+                  <div class="product-seller">@ 林晓</div>
+                </div>
+              </div>
+              <div class="product-card">
+                <div class="product-img" style="background:linear-gradient(135deg,#3d1a4e,#8b1a34)">🥁<div class="product-fav" style="color:#5a5a8a;">♡</div></div>
+                <div class="product-body">
+                  <div class="product-title">Pearl 架子鼓全套</div>
+                  <div class="product-price">¥4,200</div>
+                  <div class="product-orig">原价 ¥6,000</div>
+                  <div class="product-seller">@ 张浩</div>
+                </div>
+              </div>
+              <div class="product-card">
+                <div class="product-img" style="background:linear-gradient(135deg,#1a3e1a,#0a4a0a)">🎺<div class="product-fav">❤️</div></div>
+                <div class="product-body">
+                  <div class="product-title">小号 Bach 铜管</div>
+                  <div class="product-price">¥1,600</div>
+                  <div class="product-orig">原价 ¥2,200</div>
+                  <div class="product-seller">@ 陈星宇</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-text">首页</div></div>
+            <div class="nav-item"><div class="nav-icon">🎸</div><div class="nav-text">乐队</div></div>
+            <div class="nav-item"><div class="nav-icon">✨</div><div class="nav-text">广场</div></div>
+            <div class="nav-item active"><div class="nav-icon">🛒</div><div class="nav-text">市场</div></div>
+            <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-text">我的</div></div>
+          </div>
+        </div>
+        <div class="phone-home-indicator"><div class="home-bar"></div></div>
+      </div>
+    </div>
+
+  </div><!-- /g4 -->
+
+  <!-- ===== GROUP 5: 动态广场 ===== -->
+  <div id="g5" class="phone-row" style="display:none;">
+
+    <!-- 动态广场 -->
+    <div class="phone-wrap">
+      <div class="phone-label">动态广场</div>
+      <div class="phone-shell">
+        <div class="phone-notch"><div class="notch-dot"></div></div>
+        <div class="phone-status-bar"><span>9:41</span><span>●●●</span><span>🔋</span></div>
+        <div class="phone-screen" style="position:relative;">
+          <div class="scroll-area">
+            <div class="top-nav">
+              <div class="top-nav-title">✨ 广场</div>
+              <span class="top-nav-icon">🔔</span>
+            </div>
+            <div class="filter-tags">
+              <div class="filter-tag active">关注</div>
+              <div class="filter-tag">推荐</div>
+              <div class="filter-tag">乐队动态</div>
+            </div>
+            <div style="padding-bottom:70px;">
+              <div class="post-card">
+                <div class="post-header">
+                  <div class="post-ava">🎤</div>
+                  <div>
+                    <div class="post-author">陈星宇 · 暗夜摇滚团</div>
+                    <div class="post-time">2小时前</div>
+                  </div>
+                </div>
+                <div class="post-content">新专辑《暗夜行者》录制完成！感谢所有支持我们的粉丝，演出时间待定，大家期待一下🎸🎸</div>
+                <div class="post-images">
+                  <div class="post-img">🎤</div>
+                  <div class="post-img" style="background:linear-gradient(135deg,#1a1a3e,#8b1a34)">🎸</div>
+                </div>
+                <div class="post-actions">
+                  <div class="post-action liked">❤️ 128</div>
+                  <div class="post-action">💬 23</div>
+                  <div class="post-action">🔗 分享</div>
+                </div>
+              </div>
+              <div class="post-card">
+                <div class="post-header">
+                  <div class="post-ava" style="background:linear-gradient(135deg,#0f4a8a,#1a1a3e)">🥁</div>
+                  <div>
+                    <div class="post-author">张浩 · 鼓手</div>
+                    <div class="post-time">昨天</div>
+                  </div>
+                </div>
+                <div class="post-content">今天排练很顺利，新曲子已经可以完整演奏了，期待下次演出！</div>
+                <div class="post-actions">
+                  <div class="post-action">❤️ 56</div>
+                  <div class="post-action">💬 8</div>
+                  <div class="post-action">🔗 分享</div>
+                </div>
+              </div>
+              <div class="post-card">
+                <div class="post-header">
+                  <div class="post-ava" style="background:linear-gradient(135deg,#3d1a4e,#8b1a34)">🎹</div>
+                  <div>
+                    <div class="post-author">林晓 · 紫色幻想</div>
+                    <div class="post-time">2天前</div>
+                  </div>
+                </div>
+                <div class="post-content">出一块雅马哈电钢琴，88键，九成新，价格可小刀～感兴趣私信我！</div>
+                <div class="post-images">
+                  <div class="post-img" style="background:linear-gradient(135deg,#1a1a3e,#0f4a8a)">🎹</div>
+                  <div class="post-img" style="background:linear-gradient(135deg,#0f4a8a,#1a3e4e)">🎵</div>
+                </div>
+                <div class="post-actions">
+                  <div class="post-action">❤️ 30</div>
+                  <div class="post-action">💬 15</div>
+                  <div class="post-action">🔗 分享</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 发布按钮 -->
+          <div class="fab">+</div>
+          <div class="bottom-nav">
+            <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-text">首页</div></div>
+            <div class="nav-item"><div class="nav-icon">🎸</div><div class="nav-text">乐队</div></div>
+            <div class="nav-item active"><div class="nav-icon">✨</div><div class="nav-text">广场</div></div>
+            <div class="nav-item"><div class="nav-icon">🛒</div><div class="nav-text">市场</div></div>
+            <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-text">我的</div></div>
+          </div>
+        </div>
+        <div class="phone-home-indicator"><div class="home-bar"></div></div>
+      </div>
+    </div>
+
+    <!-- 发布动态 -->
+    <div class="phone-wrap">
+      <div class="phone-label">发布动态</div>
+      <div class="phone-shell">
+        <div class="phone-notch"><div class="notch-dot"></div></div>
+        <div class="phone-status-bar"><span>9:41</span><span>●●●</span><span>🔋</span></div>
+        <div class="phone-screen">
+          <div style="overflow-y:auto;height:580px;">
+            <div class="top-nav">
+              <div class="top-nav-left"><span style="color:#e94560;font-size:14px;">取消</span></div>
+              <div class="top-nav-title">发布动态</div>
+              <button style="background:#e94560;color:#fff;border:none;border-radius:12px;padding:5px 12px;font-size:13px;cursor:pointer;">发布</button>
+            </div>
+            <div style="padding:14px;">
+              <!-- 内容输入 -->
+              <div style="background:#16213e;border-radius:14px;padding:14px;min-height:120px;color:#5a5a8a;font-size:14px;margin-bottom:12px;">
+                分享你的音乐故事...
+              </div>
+              <!-- 图片选择 -->
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
+                <div style="aspect-ratio:1;background:linear-gradient(135deg,#1a1a3e,#e94560);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;">🎸</div>
+                <div style="aspect-ratio:1;background:#16213e;border-radius:10px;border:2px dashed #e94560;display:flex;align-items:center;justify-content:center;font-size:24px;color:#e94560;">+</div>
+              </div>
+              <!-- 选项列表 -->
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="background:#16213e;border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;border:1px solid #1a1a4e;">
+                  <span style="color:#c0c0e0;font-size:13px;">📍 添加位置</span>
+                  <span style="color:#5a5a8a;font-size:16px;">›</span>
+                </div>
+                <div style="background:#16213e;border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;border:1px solid #1a1a4e;">
+                  <span style="color:#c0c0e0;font-size:13px;">🏷 关联乐队</span>
+                  <span style="color:#5a5a8a;font-size:16px;">›</span>
+                </div>
+                <div style="background:#16213e;border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;border:1px solid #1a1a4e;">
+                  <span style="color:#c0c0e0;font-size:13px;">🌐 可见范围：公开</span>
+                  <span style="color:#5a5a8a;font-size:16px;">›</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-home-indicator"><div class="home-bar"></div></div>
+      </div>
+    </div>
+
+  </div><!-- /g5 -->
+
+  <!-- ===== GROUP 6: 个人中心 ===== -->
+  <div id="g6" class="phone-row" style="display:none;">
+
+    <!-- 个人中心 -->
+    <div class="phone-wrap">
+      <div class="phone-label">个人中心</div>
+      <div class="phone-shell">
+        <div class="phone-notch"><div class="notch-dot"></div></div>
+        <div class="phone-status-bar"><span>9:41</span><span>●●●</span><span>🔋</span></div>
+        <div class="phone-screen" style="position:relative;">
+          <div class="scroll-area">
+            <!-- 用户信息头 -->
+            <div class="profile-header">
+              <div class="profile-avatar">🎤</div>
+              <div class="profile-info">
+                <div class="profile-name">陈星宇</div>
+                <div class="profile-bio">热爱音乐 · 摇滚是我的生命</div>
+                <div class="profile-badges">
+                  <div class="badge">粉丝</div>
+                  <div class="badge">音乐人</div>
+                </div>
+              </div>
+            </div>
+            <!-- 统计 -->
+            <div class="profile-stats">
+              <div class="pstat"><div class="pstat-num">10</div><div class="pstat-label">关注</div></div>
+              <div class="pstat"><div class="pstat-num">42</div><div class="pstat-label">粉丝</div></div>
+              <div class="pstat"><div class="pstat-num">20</div><div class="pstat-label">动态</div></div>
+              <div class="pstat"><div class="pstat-num">3</div><div class="pstat-label">活动</div></div>
+            </div>
+            <!-- 快捷菜单 -->
+            <div class="menu-section">
+              <div class="menu-title">我的内容</div>
+              <div class="menu-grid">
+                <div class="menu-item"><div class="menu-icon">🎉</div><div class="menu-text">我的活动</div></div>
+                <div class="menu-item"><div class="menu-icon">❤️</div><div class="menu-text">我的收藏</div></div>
+                <div class="menu-item"><div class="menu-icon">🛒</div><div class="menu-text">我的订单</div></div>
+                <div class="menu-item"><div class="menu-icon">📋</div><div class="menu-text">我的预约</div></div>
+              </div>
+            </div>
+            <!-- 设置菜单 -->
+            <div class="menu-section" style="margin-top:14px;margin-bottom:80px;">
+              <div class="menu-title">账号设置</div>
+              <div class="menu-list">
+                <div class="menu-row">
+                  <div class="menu-row-icon">👤</div>
+                  <div class="menu-row-text">编辑个人资料</div>
+                  <div class="menu-row-arrow">›</div>
+                </div>
+                <div class="menu-row">
+                  <div class="menu-row-icon">🎭</div>
+                  <div class="menu-row-text">身份管理</div>
+                  <div class="menu-row-arrow">›</div>
+                </div>
+                <div class="menu-row">
+                  <div class="menu-row-icon">🔔</div>
+                  <div class="menu-row-text">通知设置</div>
+                  <div class="menu-row-arrow">›</div>
+                </div>
+                <div class="menu-row">
+                  <div class="menu-row-icon">🔒</div>
+                  <div class="menu-row-text">隐私设置</div>
+                  <div class="menu-row-arrow">›</div>
+                </div>
+                <div class="menu-row">
+                  <div class="menu-row-icon" style="color:#e94560;">🚪</div>
+                  <div class="menu-row-text" style="color:#e94560;">退出登录</div>
+                  <div class="menu-row-arrow" style="color:#e94560;">›</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-text">首页</div></div>
+            <div class="nav-item"><div class="nav-icon">🎸</div><div class="nav-text">乐队</div></div>
+            <div class="nav-item"><div class="nav-icon">✨</div><div class="nav-text">广场</div></div>
+            <div class="nav-item"><div class="nav-icon">🛒</div><div class="nav-text">市场</div></div>
+            <div class="nav-item active"><div class="nav-icon">👤</div><div class="nav-text">我的</div></div>
+          </div>
+        </div>
+        <div class="phone-home-indicator"><div class="home-bar"></div></div>
+      </div>
+    </div>
+
+    <!-- 编辑资料 -->
+    <div class="phone-wrap">
+      <div class="phone-label">编辑个人资料</div>
+      <div class="phone-shell">
+        <div class="phone-notch"><div class="notch-dot"></div></div>
+        <div class="phone-status-bar"><span>9:41</span><span>●●●</span><span>🔋</span></div>
+        <div class="phone-screen">
+          <div style="overflow-y:auto;height:580px;">
+            <div class="top-nav">
+              <div class="top-nav-left"><span style="color:#e94560;font-size:16px;">←</span></div>
+              <div class="top-nav-title">编辑资料</div>
+              <span style="color:#e94560;font-size:14px;">保存</span>
+            </div>
+            <!-- 头像 -->
+            <div style="display:flex;justify-content:center;padding:20px;">
+              <div style="position:relative;">
+                <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#e94560,#8b1a34);display:flex;align-items:center;justify-content:center;font-size:32px;border:2.5px solid #e94560;">🎤</div>
+                <div style="position:absolute;bottom:0;right:0;width:24px;height:24px;background:#e94560;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;">📷</div>
+              </div>
+            </div>
+            <!-- 表单 -->
+            <div style="padding:0 14px;display:flex;flex-direction:column;gap:10px;padding-bottom:20px;">
+              <div style="background:#16213e;border-radius:12px;padding:14px 16px;border:1px solid #1a1a4e;">
+                <div style="color:#5a5a8a;font-size:11px;margin-bottom:6px;">昵称</div>
+                <div style="color:#fff;font-size:14px;">陈星宇</div>
+              </div>
+              <div style="background:#16213e;border-radius:12px;padding:14px 16px;border:1px solid #1a1a4e;">
+                <div style="color:#5a5a8a;font-size:11px;margin-bottom:6px;">个人简介</div>
+                <div style="color:#fff;font-size:13px;">热爱音乐 · 摇滚是我的生命</div>
+              </div>
+              <div style="background:#16213e;border-radius:12px;padding:14px 16px;border:1px solid #1a1a4e;">
+                <div style="color:#5a5a8a;font-size:11px;margin-bottom:6px;">擅长乐器</div>
+                <div style="color:#fff;font-size:13px;">Guitar · Vocals</div>
+              </div>
+              <div style="background:#16213e;border-radius:12px;padding:14px 16px;border:1px solid #1a1a4e;">
+                <div style="color:#5a5a8a;font-size:11px;margin-bottom:6px;">音乐风格</div>
+                <div style="color:#fff;font-size:13px;">Rock · Alternative</div>
+              </div>
+              <div style="background:#16213e;border-radius:12px;padding:14px 16px;border:1px solid #1a1a4e;">
+                <div style="color:#5a5a8a;font-size:11px;margin-bottom:6px;">所在城市</div>
+                <div style="color:#fff;font-size:13px;">北京</div>
+              </div>
+              <div style="background:#16213e;border-radius:12px;padding:14px 16px;border:1px solid #1a1a4e;">
+                <div style="color:#5a5a8a;font-size:11px;margin-bottom:6px;">手机号</div>
+                <div style="color:#a0a0c0;font-size:13px;">138****8888</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-home-indicator"><div class="home-bar"></div></div>
+      </div>
+    </div>
+
+  </div><!-- /g6 -->
+
+  <!-- ===== GROUP 7: 搜索页 ===== -->
+  <div id="g7" class="phone-row" style="display:none;">
+
+    <!-- 搜索页 -->
+    <div class="phone-wrap">
+      <div class="phone-label">全局搜索</div>
+      <div class="phone-shell">
+        <div class="phone-notch"><div class="notch-dot"></div></div>
+        <div class="phone-status-bar"><span>9:41</span><span>●●●</span><span>🔋</span></div>
+        <div class="phone-screen">
+          <div style="overflow-y:auto;height:580px;">
+            <!-- 搜索栏 -->
+            <div style="padding:12px 14px;display:flex;align-items:center;gap:10px;background:#0d0d1f;border-bottom:1px solid #1a1a3e;">
+              <div style="flex:1;background:#16213e;border-radius:20px;padding:8px 14px;display:flex;align-items:center;gap:8px;border:1px solid #1a1a4e;">
+                <span style="color:#5a5a8a;">🔍</span>
+                <span style="color:#fff;font-size:13px;">摇滚</span>
+              </div>
+              <span style="color:#e94560;font-size:13px;">取消</span>
+            </div>
+            <!-- 类型筛选 -->
+            <div class="filter-tags" style="padding:10px 14px 8px;">
+              <div class="filter-tag active">全部</div>
+              <div class="filter-tag">乐队</div>
+              <div class="filter-tag">活动</div>
+              <div class="filter-tag">商品</div>
+              <div class="filter-tag">招募</div>
+            </div>
+            <!-- 乐队结果 -->
+            <div class="search-result-section">
+              <div class="search-result-title">🎸 乐队</div>
+              <div class="list-item">
+                <div class="list-avatar square">🎸</div>
+                <div class="list-info">
+                  <div class="list-name">暗夜<span style="color:#e94560;">摇滚</span>团</div>
+                  <div class="list-sub">Rock · 4名成员</div>
+                </div>
+                <div class="list-tag">关注</div>
+              </div>
+              <div class="list-item">
+                <div class="list-avatar square" style="background:linear-gradient(135deg,#4e1a1a,#8b3400)">🎵</div>
+                <div class="list-info">
+                  <div class="list-name">钢铁意志</div>
+                  <div class="list-sub">Metal · 5名成员</div>
+                </div>
+                <div class="list-tag">关注</div>
+              </div>
+            </div>
+            <!-- 活动结果 -->
+            <div class="search-result-section">
+              <div class="search-result-title">🎉 活动</div>
+              <div class="list-item">
+                <div class="list-avatar square" style="background:linear-gradient(135deg,#e94560,#8b1a34)">🎤</div>
+                <div class="list-info">
+                  <div class="list-name">五月Live House 音乐节</div>
+                  <div class="list-sub">05-10 · 北京 · 免费</div>
+                </div>
+                <div><button class="btn-signup" style="font-size:11px;padding:5px 10px;">报名</button></div>
+              </div>
+            </div>
+            <!-- 招募结果 -->
+            <div class="search-result-section">
+              <div class="search-result-title">📢 招募</div>
+              <div class="list-item">
+                <div class="list-avatar square">🎸</div>
+                <div class="list-info">
+                  <div class="list-name">急招吉他手</div>
+                  <div class="list-sub">暗夜摇滚团 · Rock</div>
+                </div>
+                <div class="list-tag">申请</div>
+              </div>
+            </div>
+            <!-- 商品结果 -->
+            <div class="search-result-section">
+              <div class="search-result-title">🛒 商品</div>
+              <div class="list-item">
+                <div class="list-avatar square" style="background:linear-gradient(135deg,#1a1a3e,#8b1a34)">🎸</div>
+                <div class="list-info">
+                  <div class="list-name">Fender 电吉他 九成新</div>
+                  <div class="list-sub">@ 王磊</div>
+                </div>
+                <div class="list-price">¥2,500</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-home-indicator"><div class="home-bar"></div></div>
+      </div>
+    </div>
+
+    <!-- 排练室 -->
+    <div class="phone-wrap">
+      <div class="phone-label">排练室列表</div>
+      <div class="phone-shell">
+        <div class="phone-notch"><div class="notch-dot"></div></div>
+        <div class="phone-status-bar"><span>9:41</span><span>●●●</span><span>🔋</span></div>
+        <div class="phone-screen" style="position:relative;">
+          <div class="scroll-area">
+            <div class="top-nav">
+              <div class="top-nav-title">🏠 排练室</div>
+              <span class="top-nav-icon">🔍</span>
+            </div>
+            <div class="filter-tags">
+              <div class="filter-tag active">全部</div>
+              <div class="filter-tag">北京</div>
+              <div class="filter-tag">上海</div>
+              <div class="filter-tag">成都</div>
+            </div>
+            <div style="padding-bottom:70px;">
+              <div class="activity-card" style="margin:0 14px 12px;">
+                <div class="activity-cover" style="background:linear-gradient(135deg,#0f4a8a,#1a1a3e);">🏠<div class="activity-status green">可预约</div></div>
+                <div class="activity-body">
+                  <div class="activity-title">星空排练室 A厅</div>
+                  <div class="activity-meta">
+                    <div class="activity-meta-item">📍 北京朝阳区</div>
+                    <div class="activity-meta-item">👥 最多8人</div>
+                  </div>
+                  <div class="activity-footer">
+                    <div class="activity-price">¥120<span>/小时</span></div>
+                    <button class="btn-signup">立即预约</button>
+                  </div>
+                </div>
+              </div>
+              <div class="activity-card" style="margin:0 14px 12px;">
+                <div class="activity-cover activity-cover-3">🎸<div class="activity-status">可预约</div></div>
+                <div class="activity-body">
+                  <div class="activity-title">摇滚地下室 全套装备</div>
+                  <div class="activity-meta">
+                    <div class="activity-meta-item">📍 北京海淀区</div>
+                    <div class="activity-meta-item">👥 最多6人</div>
+                  </div>
+                  <div class="activity-footer">
+                    <div class="activity-price">¥80<span>/小时</span></div>
+                    <button class="btn-signup">立即预约</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-nav">
+            <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-text">首页</div></div>
+            <div class="nav-item"><div class="nav-icon">🎸</div><div class="nav-text">乐队</div></div>
+            <div class="nav-item"><div class="nav-icon">✨</div><div class="nav-text">广场</div></div>
+            <div class="nav-item"><div class="nav-icon">🛒</div><div class="nav-text">市场</div></div>
+            <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-text">我的</div></div>
+          </div>
+        </div>
+        <div class="phone-home-indicator"><div class="home-bar"></div></div>
+      </div>
+    </div>
+
+  </div><!-- /g7 -->
+
+</div>
+
+<script>
+function showGroup(id, btn) {
+  document.querySelectorAll('.phone-row').forEach(el => el.style.display = 'none');
+  document.getElementById(id).style.display = 'flex';
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>

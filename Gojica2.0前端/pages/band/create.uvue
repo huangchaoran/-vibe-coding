@@ -1,0 +1,324 @@
+<template>
+
+	<view class="create-band-container">
+		<view class="top-nav">
+			<text class="back-btn" @click="goBack">&lt;</text>
+			<text class="nav-title">创建乐队</text>
+			<view class="placeholder"></view>
+		</view>
+
+		<scroll-view class="content-area" scroll-y="true">
+			<view class="avatar-section">
+				<view class="avatar-upload" @click="uploadAvatar">
+					<text class="upload-icon">+</text>
+				</view>
+				<text class="upload-tip">上传乐队头像</text>
+			</view>
+
+			<view class="form-section">
+				<view class="form-item">
+					<text class="form-label">乐队名称 *</text>
+					<input
+						class="form-input"
+						v-model="form.name"
+						placeholder="请输入乐队名称"
+						placeholder-class="placeholder"
+					/>
+				</view>
+
+				<view class="form-item">
+					<text class="form-label">音乐风格 *</text>
+					<view class="style-tags">
+						<view
+							class="style-tag"
+							v-for="style in styles"
+							:key="style.value"
+							:class="{ active: form.styles.includes(style.value) }"
+							@click="toggleStyle(style.value)"
+						>
+							<text>{{ style.emoji }} {{ style.label }}</text>
+						</view>
+					</view>
+				</view>
+
+				<view class="form-item">
+					<text class="form-label">乐队简介</text>
+					<textarea
+						class="form-textarea"
+						v-model="form.intro"
+						placeholder="介绍你们的乐队.."
+						placeholder-class="placeholder"
+					></textarea>
+				</view>
+
+				<view class="form-item">
+					<text class="form-label">所在城市</text>
+					<view class="city-picker" @click="selectCity">
+						<text class="picker-value">{{ form.city || '请选择城市' }}</text>
+						<text class="picker-arrow">></text>
+					</view>
+				</view>
+			</view>
+
+			<view class="submit-section">
+				<view class="submit-btn" @click="submitForm" :class="{ disabled: !canSubmit }">
+					<text> 创建乐队</text>
+				</view>
+			</view>
+		</scroll-view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, computed } from 'vue'
+import { bandApi } from '../../common/utils/api.uts'
+import { MUSIC_STYLES } from '../../common/utils/theme'
+
+const styles = ref(MUSIC_STYLES)
+const form = ref({
+	name: '',
+	styles: [] as string[],
+	intro: '',
+	city: '',
+	avatar: ''
+})
+
+const canSubmit = computed(() => {
+	return form.value.name.trim().length > 0 && form.value.styles.length > 0
+})
+
+const uploadAvatar = () => {
+	uni.showToast({ title: '头像上传开发中', icon: 'none' })
+}
+
+const toggleStyle = (style: string) => {
+	const index = form.value.styles.indexOf(style)
+	if (index > -1) {
+		form.value.styles.splice(index, 1)
+	} else {
+		form.value.styles.push(style)
+	}
+}
+
+const selectCity = () => {
+	uni.showToast({ title: '城市选择开发中', icon: 'none' })
+}
+
+const submitForm = async () => {
+	if (!canSubmit.value) {
+		uni.showToast({ title: '请填写必填项', icon: 'none' })
+		return
+	}
+
+	try {
+		uni.showLoading({ title: '创建中..' })
+		const res = await bandApi.create({
+			name: form.value.name,
+			style: form.value.styles[0],
+			intro: form.value.intro,
+			city: form.value.city
+		})
+		uni.hideLoading()
+
+		if (res.code === 1000 || res.code === 1001) {
+			uni.showToast({ title: '创建成功', icon: 'success' })
+			setTimeout(() => {
+				uni.navigateBack()
+			}, 1500)
+		}
+	} catch (e) {
+		uni.hideLoading()
+		uni.showToast({ title: '创建失败', icon: 'none' })
+	}
+}
+
+const goBack = () => {
+	uni.navigateBack()
+}
+</script>
+
+<style>
+.create-band-container {
+	width: 750rpx;
+	min-height: 100vh;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: column;
+}
+
+.top-nav {
+	width: 750rpx;
+	height: 88rpx;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 28rpx;
+	border-bottom: 1rpx solid #1a1a4e;
+}
+
+.back-btn {
+	font-size: 36rpx;
+	color: #ffffff;
+}
+
+.nav-title {
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #ffffff;
+}
+
+.placeholder {
+	width: 60rpx;
+}
+
+.content-area {
+	flex: 1;
+	padding: 28rpx;
+}
+
+.avatar-section {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-bottom: 40rpx;
+}
+
+.avatar-upload {
+	width: 160rpx;
+	height: 160rpx;
+	border: 2rpx dashed #1a1a4e;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.upload-icon {
+	font-size: 80rpx;
+	color: #5a5a8a;
+}
+
+.upload-tip {
+	font-size: 24rpx;
+	color: #5a5a8a;
+	margin-top: 16rpx;
+}
+
+.form-section {
+	display: flex;
+	flex-direction: column;
+}
+
+.form-item {
+	margin-bottom: 32rpx;
+}
+
+.form-label {
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #ffffff;
+	display: block;
+	margin-bottom: 16rpx;
+}
+
+.form-input {
+	width: 100%;
+	background-color: #16213e;
+	border: 1rpx solid #1a1a4e;
+	border-radius: 24rpx;
+	padding: 24rpx;
+	font-size: 28rpx;
+	color: #ffffff;
+}
+
+.placeholder {
+	color: #5a5a8a;
+	font-size: 28rpx;
+}
+
+.style-tags {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 16rpx;
+}
+
+.style-tag {
+	background-color: #16213e;
+	color: #a0a0c0;
+	font-size: 24rpx;
+	padding: 16rpx 24rpx;
+	border-radius: 28rpx;
+	border: 1rpx solid #1a1a4e;
+}
+
+.style-tag.active {
+	background-color: #e94560;
+	color: #ffffff;
+	border-color: #e94560;
+}
+
+.form-textarea {
+	width: 100%;
+	min-height: 200rpx;
+	background-color: #16213e;
+	border: 1rpx solid #1a1a4e;
+	border-radius: 24rpx;
+	padding: 24rpx;
+	font-size: 28rpx;
+	color: #ffffff;
+	line-height: 1.6;
+}
+
+.city-picker {
+	width: 100%;
+	background-color: #16213e;
+	border: 1rpx solid #1a1a4e;
+	border-radius: 24rpx;
+	padding: 24rpx;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.picker-value {
+	font-size: 28rpx;
+	color: #ffffff;
+}
+
+.picker-arrow {
+	font-size: 28rpx;
+	color: #5a5a8a;
+}
+
+.submit-section {
+	margin-top: 40rpx;
+}
+
+.submit-btn {
+	width: 100%;
+	background-color: #e94560;
+	border-radius: 40rpx;
+	padding: 28rpx;
+	text-align: center;
+}
+
+.submit-btn.disabled {
+	background-color: #333333;
+}
+
+.submit-btn text {
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #ffffff;
+}
+
+.submit-btn.disabled text {
+	color: #666666;
+}
+</style>
+
+

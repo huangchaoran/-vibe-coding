@@ -1,0 +1,377 @@
+<template>
+
+	<view class="search-container">
+		<view class="search-header">
+			<view class="search-bar">
+				<text class="search-icon"></text>
+				<input
+					class="search-input"
+					v-model="keyword"
+					placeholder="搜索乐队、活动、商品.."
+					placeholder-class="placeholder"
+					@confirm="doSearch"
+				/>
+			</view>
+			<text class="cancel-btn" @click="goBack">取消</text>
+		</view>
+
+		<view class="type-filter">
+			<view
+				class="type-item"
+				:class="{ active: currentType === '' }"
+				@click="selectType('')"
+			>
+				<text>全部</text>
+			</view>
+			<view
+				class="type-item"
+				:class="{ active: currentType === 'band' }"
+				@click="selectType('band')"
+			>
+				<text> 乐队</text>
+			</view>
+			<view
+				class="type-item"
+				:class="{ active: currentType === 'activity' }"
+				@click="selectType('activity')"
+			>
+				<text> 活动</text>
+			</view>
+			<view
+				class="type-item"
+				:class="{ active: currentType === 'product' }"
+				@click="selectType('product')"
+			>
+				<text> 商品</text>
+			</view>
+			<view
+				class="type-item"
+				:class="{ active: currentType === 'recruit' }"
+				@click="selectType('recruit')"
+			>
+				<text>📢 招募</text>
+			</view>
+		</view>
+
+		<scroll-view class="content-area" scroll-y="true">
+			<view class="result-section" v-if="currentType === '' || currentType === 'band'">
+				<view class="section-header" v-if="bands.length > 0">
+					<text class="section-title"> 乐队</text>
+				</view>
+				<view class="result-list">
+					<view class="band-item" v-for="band in bands" :key="band.id" @click="goToBand(band.id)">
+						<view class="item-avatar" :style="{ background: getBandGradient(band.style) }">
+							<text class="avatar-emoji">{{ getBandEmoji(band.style) }}</text>
+						</view>
+						<view class="item-info">
+							<text class="item-name">{{ band.name }}</text>
+							<text class="item-meta">{{ band.style }} · {{ band.member_count || 0 }}名成员</text>
+						</view>
+						<view class="follow-btn">
+							<text>+ 关注</text>
+						</view>
+					</view>
+				</view>
+			</view>
+
+			<view class="result-section" v-if="currentType === '' || currentType === 'activity'">
+				<view class="section-header" v-if="activities.length > 0">
+					<text class="section-title"> 活动</text>
+				</view>
+				<view class="result-list">
+					<view class="activity-item" v-for="activity in activities" :key="activity.id" @click="goToActivity(activity.id)">
+						<view class="item-avatar" :style="{ background: getActivityGradient(activity.type) }">
+							<text class="avatar-emoji">{{ getActivityEmoji(activity.type) }}</text>
+						</view>
+						<view class="item-info">
+							<text class="item-name">{{ activity.title }}</text>
+							<text class="item-meta">📅 {{ formatDate(activity.start_time) }} ·  {{ activity.location }}</text>
+						</view>
+						<view class="signup-btn">
+							<text>报名</text>
+						</view>
+					</view>
+				</view>
+			</view>
+
+			<view class="empty-state" v-if="hasSearched && bands.length === 0 && activities.length === 0">
+				<text class="empty-icon"></text>
+				<text class="empty-text">未找到相关结果</text>
+			</view>
+		</scroll-view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+import { searchApi } from '../../common/utils/api.uts'
+
+const keyword = ref('')
+const currentType = ref('')
+const bands = ref<any[]>([])
+const activities = ref<any[]>([])
+const hasSearched = ref(false)
+
+const getBandGradient = (style: string): string => {
+	const gradients: Record<string, string> = {
+		rock: 'linear-gradient(135deg, #e94560, #8b1a34)',
+		jazz: 'linear-gradient(135deg, #9b59b6, #8e44ad)',
+		pop: 'linear-gradient(135deg, #3498db, #2980b9)',
+		folk: 'linear-gradient(135deg, #27ae60, #2ecc71)'
+	}
+	return gradients[style?.toLowerCase()] || 'linear-gradient(135deg, #e94560, #8b1a34)'
+}
+
+const getBandEmoji = (style: string): string => {
+	const emojis: Record<string, string> = {
+		rock: '',
+		jazz: '',
+		pop: '',
+		folk: ''
+	}
+	return emojis[style?.toLowerCase()] || '🎵'
+}
+
+const getActivityGradient = (type: string): string => {
+	const gradients: Record<string, string> = {
+		performance: 'linear-gradient(135deg, #e94560, #8b1a34)',
+		competition: 'linear-gradient(135deg, #f39c12, #e67e22)',
+		rehearsal: 'linear-gradient(135deg, #3498db, #2980b9)',
+		course: 'linear-gradient(135deg, #9b59b6, #8e44ad)'
+	}
+	return gradients[type?.toLowerCase()] || 'linear-gradient(135deg, #16213e, #0f4a8a)'
+}
+
+const getActivityEmoji = (type: string): string => {
+	const emojis: Record<string, string> = {
+		performance: '',
+		competition: '',
+		rehearsal: '',
+		course: ''
+	}
+	return emojis[type?.toLowerCase()] || '🎵'
+}
+
+const formatDate = (dateStr: string): string => {
+	if (!dateStr) return '待定'
+	const date = new Date(dateStr)
+	const month = date.getMonth() + 1
+	const day = date.getDate()
+	return `${month}月${day}日`
+}
+
+const doSearch = async () => {
+	if (!keyword.value.trim()) {
+		uni.showToast({ title: '请输入搜索关键词', icon: 'none' })
+		return
+	}
+
+	hasSearched.value = true
+	try {
+		const res = await searchApi.search(keyword.value, currentType.value)
+		if (res.code === 1000) {
+			bands.value = res.data.bands || []
+			activities.value = res.data.activities || []
+		}
+	} catch (e) {
+		console.error('Search error:', e)
+		uni.showToast({ title: '搜索失败', icon: 'none' })
+	}
+}
+
+const selectType = (type: string) => {
+	currentType.value = type
+	if (hasSearched.value) {
+		doSearch()
+	}
+}
+
+const goToBand = (id: number) => {
+	uni.navigateTo({ url: `/pages/band/detail?id=${id}` })
+}
+
+const goToActivity = (id: number) => {
+	uni.navigateTo({ url: `/pages/activity/detail?id=${id}` })
+}
+
+const goBack = () => {
+	uni.navigateBack()
+}
+</script>
+
+<style>
+.search-container {
+	width: 750rpx;
+	min-height: 100vh;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: column;
+}
+
+.search-header {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: 20rpx 28rpx;
+	background-color: #0d0d1f;
+	border-bottom: 1rpx solid #1a1a4e;
+}
+
+.search-bar {
+	flex: 1;
+	background-color: #1a1a3e;
+	border-radius: 40rpx;
+	padding: 16rpx 28rpx;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.search-icon {
+	font-size: 28rpx;
+	margin-right: 16rpx;
+}
+
+.search-input {
+	flex: 1;
+	font-size: 28rpx;
+	color: #ffffff;
+}
+
+.placeholder {
+	color: #5a5a8a;
+	font-size: 28rpx;
+}
+
+.cancel-btn {
+	font-size: 28rpx;
+	color: #a0a0c0;
+	margin-left: 20rpx;
+}
+
+.type-filter {
+	display: flex;
+	flex-direction: row;
+	padding: 20rpx 28rpx;
+	border-bottom: 1rpx solid #1a1a4e;
+}
+
+.type-item {
+	flex: 1;
+	text-align: center;
+	padding: 12rpx 0;
+	color: #5a5a8a;
+	font-size: 26rpx;
+}
+
+.type-item.active {
+	color: #e94560;
+	font-weight: 600;
+}
+
+.content-area {
+	flex: 1;
+	padding: 28rpx;
+}
+
+.result-section {
+	margin-bottom: 32rpx;
+}
+
+.section-header {
+	margin-bottom: 16rpx;
+}
+
+.section-title {
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #ffffff;
+}
+
+.result-list {
+	display: flex;
+	flex-direction: column;
+}
+
+.band-item,
+.activity-item {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: 20rpx 0;
+	border-bottom: 1rpx solid #1a1a4e;
+}
+
+.item-avatar {
+	width: 80rpx;
+	height: 80rpx;
+	border-radius: 16rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.avatar-emoji {
+	font-size: 32rpx;
+}
+
+.item-info {
+	flex: 1;
+	margin-left: 20rpx;
+}
+
+.item-name {
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #ffffff;
+	display: block;
+}
+
+.item-meta {
+	font-size: 22rpx;
+	color: #a0a0c0;
+	display: block;
+	margin-top: 4rpx;
+}
+
+.follow-btn {
+	background-color: #e94560;
+	border-radius: 24rpx;
+	padding: 12rpx 24rpx;
+}
+
+.follow-btn text {
+	font-size: 22rpx;
+	color: #ffffff;
+}
+
+.signup-btn {
+	background-color: #e94560;
+	border-radius: 24rpx;
+	padding: 12rpx 24rpx;
+}
+
+.signup-btn text {
+	font-size: 22rpx;
+	color: #ffffff;
+}
+
+.empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 100rpx 40rpx;
+}
+
+.empty-icon {
+	font-size: 80rpx;
+}
+
+.empty-text {
+	font-size: 26rpx;
+	color: #5a5a8a;
+	margin-top: 20rpx;
+}
+</style>
+

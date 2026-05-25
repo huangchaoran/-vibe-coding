@@ -1,0 +1,454 @@
+<template>
+	<view class="user-center-container">
+		<view class="profile-header">
+			<view class="user-avatar" :style="{ background: getAvatarGradient() }">
+				<text class="avatar-emoji"></text>
+			</view>
+			<view class="user-info">
+				<text class="user-name">{{ userInfo.nickname || '未登录' }}</text>
+				<text class="user-bio">{{ userInfo.bio || '这个人很懒，什么都没写' }}</text>
+				<view class="user-badges">
+					<view class="badge" v-if="userInfo.identity">
+						<text>{{ getIdentityText(userInfo.identity) }}</text>
+					</view>
+				</view>
+			</view>
+		</view>
+
+		<view class="stats-row">
+			<view class="stat-item">
+				<text class="stat-num">{{ userStats.following || 0 }}</text>
+				<text class="stat-label">关注</text>
+			</view>
+			<view class="stat-item">
+				<text class="stat-num">{{ userStats.followers || 0 }}</text>
+				<text class="stat-label">粉丝</text>
+			</view>
+			<view class="stat-item">
+				<text class="stat-num">{{ userStats.posts || 0 }}</text>
+				<text class="stat-label">动态</text>
+			</view>
+			<view class="stat-item">
+				<text class="stat-num">{{ userStats.activities || 0 }}</text>
+				<text class="stat-label">活动</text>
+			</view>
+		</view>
+
+		<scroll-view class="content-area" scroll-y="true">
+			<view class="menu-section">
+				<text class="menu-title">我的服务</text>
+				<view class="menu-grid">
+					<view class="menu-item" @click="goToMyActivities">
+						<text class="menu-icon"></text>
+						<text class="menu-text">我的活动</text>
+					</view>
+					<view class="menu-item" @click="goToMyFavorites">
+						<text class="menu-icon">❤️</text>
+						<text class="menu-text">我的收藏</text>
+					</view>
+					<view class="menu-item" @click="goToMyOrders">
+						<text class="menu-icon"></text>
+						<text class="menu-text">我的订单</text>
+					</view>
+					<view class="menu-item" @click="goToMyBookings">
+						<text class="menu-icon">📋</text>
+						<text class="menu-text">我的预约</text>
+					</view>
+				</view>
+			</view>
+
+			<view class="menu-section">
+				<text class="menu-title">设置</text>
+				<view class="menu-list">
+					<view class="menu-row" @click="goToProfile">
+						<text class="menu-row-icon"></text>
+						<text class="menu-row-text">编辑个人资料</text>
+						<text class="menu-row-arrow">></text>
+				</view>
+				<view class="menu-row" @click="goToIdentity">
+					<text class="menu-row-icon">🎭</text>
+					<text class="menu-row-text">身份管理</text>
+					<text class="menu-row-arrow">></text>
+				</view>
+				<view class="menu-row" @click="goToNotification">
+					<text class="menu-row-icon"></text>
+					<text class="menu-row-text">通知设置</text>
+					<text class="menu-row-arrow">></text>
+				</view>
+				<view class="menu-row" @click="goToPrivacy">
+					<text class="menu-row-icon">🔒</text>
+					<text class="menu-row-text">隐私设置</text>
+					<text class="menu-row-arrow">></text>
+					</view>
+					<view class="menu-row" @click="logout">
+						<text class="menu-row-icon">🚪</text>
+						<text class="menu-row-text logout">退出登录</text>
+						<text class="menu-row-arrow">></text>
+					</view>
+				</view>
+			</view>
+		</scroll-view>
+
+		<view class="bottom-nav">
+			<view class="nav-item" @click="switchTab(0)">
+				<text class="nav-icon">🏠</text>
+				<text class="nav-text">首页</text>
+			</view>
+			<view class="nav-item" @click="switchTab(1)">
+				<text class="nav-icon"></text>
+				<text class="nav-text">乐队</text>
+			</view>
+			<view class="nav-item" @click="switchTab(2)">
+				<text class="nav-icon"></text>
+				<text class="nav-text">广场</text>
+			</view>
+			<view class="nav-item" @click="switchTab(3)">
+				<text class="nav-icon"></text>
+				<text class="nav-text">市场</text>
+			</view>
+			<view class="nav-item active" @click="switchTab(4)">
+				<text class="nav-icon"></text>
+				<text class="nav-text">我的</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, onMounted } from 'vue'
+import { userApi } from '../../common/utils/api.uts'
+import api from '../../common/utils/api.uts'
+
+const userInfo = ref<any>({})
+const userStats = ref({
+	following: 10,
+	followers: 42,
+	posts: 20,
+	activities: 3
+})
+
+const getAvatarGradient = (): string => {
+	return 'linear-gradient(135deg, #e94560, #8b1a34)'
+}
+
+const getIdentityText = (identity: string): string => {
+	const texts: Record<string, string> = {
+		fan: '粉丝',
+		musician: '音乐人',
+		band: '乐队',
+		venue: '场地'
+	}
+	return texts[identity] || '用户'
+}
+
+const loadUserInfo = async () => {
+	try {
+		const res = await userApi.getProfile()
+		if (res && res.code === 1000) {
+			userInfo.value = res.data || {}
+		}
+	} catch (e) {
+		console.error('Load user info error:', e)
+	}
+}
+
+const loadUserStats = async () => {
+	try {
+		const res = await userApi.getStats()
+		if (res && res.code === 1000) {
+			userStats.value = res.data || {}
+		}
+	} catch (e) {
+		console.error('Load user stats error:', e)
+	}
+}
+
+const goToProfile = () => {
+	uni.navigateTo({ url: '/pages/user/profile' })
+}
+
+const goToIdentity = () => {
+	uni.showToast({ title: '身份管理开发中', icon: 'none' })
+}
+
+const goToNotification = () => {
+	uni.showToast({ title: '通知设置开发中', icon: 'none' })
+}
+
+const goToPrivacy = () => {
+	uni.showToast({ title: '隐私设置开发中', icon: 'none' })
+}
+
+const goToMyActivities = () => {
+	uni.showToast({ title: '我的活动开发中', icon: 'none' })
+}
+
+const goToMyFavorites = () => {
+	uni.showToast({ title: '我的收藏开发中', icon: 'none' })
+}
+
+const goToMyOrders = () => {
+	uni.showToast({ title: '我的订单开发中', icon: 'none' })
+}
+
+const goToMyBookings = () => {
+	uni.showToast({ title: '我的预约开发中', icon: 'none' })
+}
+
+const logout = () => {
+	uni.showModal({
+		title: '提示',
+		content: '确定要退出登录吗？',
+		success: async (res) => {
+			if (res.confirm) {
+				try {
+					await api.logout()
+				} catch (e) {
+					console.error('Logout error:', e)
+				}
+				api.clearToken()
+				uni.navigateTo({ url: '/pages/login/index' })
+			}
+		}
+	})
+}
+
+const switchTab = (index: number) => {
+	const tabs = [
+		'/pages/home/index',
+		'/pages/band/list',
+		'/pages/square/index',
+		'/pages/market/list',
+		'/pages/user/index'
+	]
+	if (index === 4) return
+	uni.switchTab({ url: tabs[index] })
+}
+
+onMounted(() => {
+	const storedUserInfo = uni.getStorageSync('userInfo')
+	if (storedUserInfo) {
+		userInfo.value = storedUserInfo
+	}
+	loadUserInfo()
+	loadUserStats()
+})
+</script>
+
+<style>
+.user-center-container {
+	width: 750rpx;
+	min-height: 100vh;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: column;
+}
+
+.profile-header {
+	background: linear-gradient(180deg, #1a0a14 0%, #0d0d1f 100%);
+	padding: 40rpx 28rpx;
+	display: flex;
+	align-items: center;
+}
+
+.user-avatar {
+	width: 140rpx;
+	height: 140rpx;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 5rpx solid #e94560;
+	flex-shrink: 0;
+}
+
+.avatar-emoji {
+	font-size: 60rpx;
+}
+
+.user-info {
+	flex: 1;
+	margin-left: 32rpx;
+}
+
+.user-name {
+	font-size: 36rpx;
+	font-weight: 700;
+	color: #ffffff;
+	display: block;
+}
+
+.user-bio {
+	font-size: 24rpx;
+	color: #a0a0c0;
+	display: block;
+	margin-top: 8rpx;
+}
+
+.user-badges {
+	display: flex;
+	flex-direction: row;
+	margin-top: 12rpx;
+}
+
+.badge {
+	background: rgba(233, 69, 96, 0.15);
+	color: #e94560;
+	font-size: 20rpx;
+	padding: 6rpx 16rpx;
+	border-radius: 16rpx;
+	border: 1rpx solid rgba(233, 69, 96, 0.3);
+}
+
+.stats-row {
+	display: flex;
+	justify-content: space-around;
+	padding: 28rpx;
+	background-color: #16213e;
+	margin: 28rpx;
+	border-radius: 28rpx;
+}
+
+.stat-item {
+	text-align: center;
+}
+
+.stat-num {
+	font-size: 36rpx;
+	font-weight: 700;
+	color: #ffffff;
+	display: block;
+}
+
+.stat-label {
+	font-size: 22rpx;
+	color: #a0a0c0;
+	display: block;
+	margin-top: 6rpx;
+}
+
+.content-area {
+	flex: 1;
+	width: 750rpx;
+	padding-bottom: 100rpx;
+}
+
+.menu-section {
+	margin: 28rpx;
+}
+
+.menu-title {
+	font-size: 24rpx;
+	color: #5a5a8a;
+	letter-spacing: 1rpx;
+	margin-bottom: 16rpx;
+	display: block;
+}
+
+.menu-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16rpx;
+}
+
+.menu-item {
+	background-color: #16213e;
+	border-radius: 24rpx;
+	padding: 28rpx 24rpx;
+	display: flex;
+	align-items: center;
+	border: 1rpx solid #1a1a4e;
+}
+
+.menu-icon {
+	font-size: 40rpx;
+	width: 52rpx;
+	text-align: center;
+}
+
+.menu-text {
+	font-size: 26rpx;
+	color: #c0c0e0;
+	flex: 1;
+	margin-left: 20rpx;
+}
+
+.menu-list {
+	background-color: #16213e;
+	border-radius: 28rpx;
+	overflow: hidden;
+}
+
+.menu-row {
+	display: flex;
+	align-items: center;
+	padding: 28rpx;
+	border-bottom: 1rpx solid #1a1a3e;
+}
+
+.menu-row:last-child {
+	border-bottom: none;
+}
+
+.menu-row-icon {
+	font-size: 36rpx;
+	width: 48rpx;
+}
+
+.menu-row-text {
+	flex: 1;
+	font-size: 28rpx;
+	color: #c0c0e0;
+	margin-left: 24rpx;
+}
+
+.menu-row-text.logout {
+	color: #e94560;
+}
+
+.menu-row-arrow {
+	font-size: 28rpx;
+	color: #5a5a8a;
+}
+
+.bottom-nav {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 100rpx;
+	background-color: #0f0f23;
+	border-top: 1rpx solid #1a1a3e;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.nav-item {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.nav-icon {
+	font-size: 40rpx;
+	color: #5a5a8a;
+}
+
+.nav-text {
+	font-size: 20rpx;
+	color: #5a5a8a;
+	margin-top: 4rpx;
+}
+
+.nav-item.active .nav-icon {
+	color: #e94560;
+}
+
+.nav-item.active .nav-text {
+	color: #e94560;
+}
+</style>
+

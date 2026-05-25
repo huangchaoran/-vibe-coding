@@ -1,0 +1,507 @@
+<template>
+	<view class="square-container">
+		<view class="top-nav">
+			<text class="nav-title"> 广场</text>
+			<view class="nav-right">
+				<text class="nav-icon" @click="goToNotification"></text>
+			</view>
+		</view>
+
+		<view class="filter-tabs">
+			<view class="filter-tab" :class="{ active: currentTab === 'following' }" @click="selectTab('following')">
+				<text>关注</text>
+			</view>
+			<view class="filter-tab" :class="{ active: currentTab === 'recommend' }" @click="selectTab('recommend')">
+				<text>推荐</text>
+			</view>
+			<view class="filter-tab" :class="{ active: currentTab === 'band' }" @click="selectTab('band')">
+				<text>乐队动态</text>
+			</view>
+		</view>
+
+		<scroll-view class="content-area" scroll-y="true" @scrolltolower="loadMore">
+			<view class="posts-list">
+				<view class="post-card" v-for="post in posts" :key="post.id">
+					<view class="post-header">
+						<view class="post-avatar" :style="{ background: getAvatarGradient(post.author?.identity) }">
+							<text class="avatar-emoji">{{ getAvatarEmoji(post.author?.identity) }}</text>
+						</view>
+						<view class="post-author-info">
+							<text class="author-name">{{ post.author?.nickname || '匿名用户' }}</text>
+							<text class="post-time">{{ formatTime(post.created_at) }}</text>
+						</view>
+					</view>
+					<text class="post-content">{{ post.content }}</text>
+					<view class="post-images" v-if="post.images && post.images.length > 0">
+						<view class="post-image" v-for="(img, index) in post.images" :key="index">
+							<text class="image-placeholder">{{ index + 1 }}</text>
+						</view>
+					</view>
+					<view class="post-actions">
+						<view class="action-item" :class="{ liked: post.isLiked }" @click="toggleLike(post)">
+							<text>{{ post.isLiked ? '❤️' : '🤍' }}</text>
+							<text class="action-count">{{ post.like_count || 0 }}</text>
+						</view>
+						<view class="action-item" @click="goToComment(post.id)">
+							<text></text>
+							<text class="action-count">{{ post.comment_count || 0 }}</text>
+						</view>
+						<view class="action-item" @click="sharePost(post)">
+							<text>🔗</text>
+							<text class="action-count">分享</text>
+						</view>
+					</view>
+				</view>
+			</view>
+
+			<view class="loading-more" v-if="loading">
+				<text>加载中..</text>
+			</view>
+			<view class="no-more" v-if="!loading && noMore">
+				<text>没有更多了</text>
+			</view>
+			<view class="empty-state" v-if="!loading && posts.length === 0">
+				<text class="empty-icon">🎵</text>
+				<text class="empty-text">暂无动态</text>
+			</view>
+		</scroll-view>
+
+		<view class="fab" @click="goToPost">
+			<text>+</text>
+		</view>
+
+		<view class="bottom-nav">
+			<view class="nav-item" @click="switchTab(0)">
+				<text class="nav-icon">🏠</text>
+				<text class="nav-text">首页</text>
+			</view>
+			<view class="nav-item" @click="switchTab(1)">
+				<text class="nav-icon"></text>
+				<text class="nav-text">乐队</text>
+			</view>
+			<view class="nav-item active" @click="switchTab(2)">
+				<text class="nav-icon"></text>
+				<text class="nav-text">广场</text>
+			</view>
+			<view class="nav-item" @click="switchTab(3)">
+				<text class="nav-icon"></text>
+				<text class="nav-text">市场</text>
+			</view>
+			<view class="nav-item" @click="switchTab(4)">
+				<text class="nav-icon"></text>
+				<text class="nav-text">我的</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, onMounted } from 'vue'
+import { postApi } from '../../common/utils/api.uts'
+
+const currentTab = ref('recommend')
+const posts = ref<any[]>([])
+const page = ref(1)
+const pageSize = 10
+const loading = ref(false)
+const noMore = ref(false)
+
+const getAvatarGradient = (identity?: string): string => {
+	const gradients: Record<string, string> = {
+		musician: 'linear-gradient(135deg, #e94560, #8b1a34)',
+		band: 'linear-gradient(135deg, #9b59b6, #8e44ad)',
+		venue: 'linear-gradient(135deg, #3498db, #2980b9)'
+	}
+	return gradients[identity || ''] || 'linear-gradient(135deg, #27ae60, #2ecc71)'
+}
+
+const getAvatarEmoji = (identity?: string): string => {
+	const emojis: Record<string, string> = {
+		musician: '',
+		band: '',
+		venue: '🏠',
+		fan: ''
+	}
+	return emojis[identity || ''] || ''
+}
+
+const formatTime = (dateStr: string): string => {
+	if (!dateStr) return ''
+	const now = new Date()
+	const date = new Date(dateStr)
+	const diff = now.getTime() - date.getTime()
+	const minutes = Math.floor(diff / 60000)
+	const hours = Math.floor(diff / 3600000)
+	const days = Math.floor(diff / 86400000)
+
+	if (minutes < 1) return '刚刚'
+	if (minutes < 60) return `${minutes}分钟前`
+	if (hours < 24) return `${hours}小时前`
+	if (days < 7) return `${days}天前`
+	return `${date.getMonth() + 1}-${date.getDate()}`
+}
+
+const loadPosts = async (reset = false) => {
+	if (loading.value) return
+	if (reset) {
+		page.value = 1
+		noMore.value = false
+		posts.value = []
+	}
+
+	loading.value = true
+	try {
+		const params: any = {
+			page: page.value,
+			pageSize
+		}
+		if (currentTab.value !== 'recommend') {
+			params.type = currentTab.value
+		}
+
+		const res = await postApi.getList(params)
+		if (res && res.code === 1000) {
+			const list = res.data?.list || []
+			if (reset) {
+				posts.value = list
+			} else {
+				posts.value = [...posts.value, ...list]
+			}
+
+			if (list.length < pageSize) {
+				noMore.value = true
+			} else {
+				page.value++
+			}
+		}
+	} catch (e) {
+		console.error('Load posts error:', e)
+		uni.showToast({ title: '加载失败', icon: 'none' })
+	} finally {
+		loading.value = false
+	}
+}
+
+const selectTab = (tab: string) => {
+	currentTab.value = tab
+	loadPosts(true)
+}
+
+const loadMore = () => {
+	if (!noMore.value) {
+		loadPosts(false)
+	}
+}
+
+const toggleLike = async (post: any) => {
+	try {
+		const res = await postApi.like(post.id)
+		if (res && res.code === 1000) {
+			post.isLiked = res.data?.liked
+			post.like_count = res.data?.like_count
+		}
+	} catch (e) {
+		uni.showToast({ title: '操作失败', icon: 'none' })
+	}
+}
+
+const goToComment = (postId: number) => {
+	uni.showToast({ title: '评论功能开发中', icon: 'none' })
+}
+
+const sharePost = (post: any) => {
+	uni.showToast({ title: '分享功能开发中', icon: 'none' })
+}
+
+const goToPost = () => {
+	uni.navigateTo({ url: '/pages/square/post' })
+}
+
+const goToNotification = () => {
+	uni.showToast({ title: '通知功能开发中', icon: 'none' })
+}
+
+const switchTab = (index: number) => {
+	const tabs = [
+		'/pages/home/index',
+		'/pages/band/list',
+		'/pages/square/index',
+		'/pages/market/list',
+		'/pages/user/index'
+	]
+	if (index === 2) return
+	uni.switchTab({ url: tabs[index] })
+}
+
+onMounted(() => {
+	loadPosts(true)
+})
+</script>
+
+<style>
+.square-container {
+	width: 750rpx;
+	min-height: 100vh;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: column;
+}
+
+.top-nav {
+	width: 750rpx;
+	height: 88rpx;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 28rpx;
+	border-bottom: 1rpx solid #1a1a4e;
+}
+
+.nav-title {
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #ffffff;
+}
+
+.nav-right {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.nav-icon {
+	font-size: 36rpx;
+}
+
+.filter-tabs {
+	display: flex;
+	flex-direction: row;
+	padding: 20rpx 28rpx;
+	border-bottom: 1rpx solid #1a1a4e;
+}
+
+.filter-tab {
+	flex: 1;
+	text-align: center;
+	padding: 12rpx 0;
+	color: #5a5a8a;
+	font-size: 28rpx;
+	position: relative;
+}
+
+.filter-tab.active {
+	color: #e94560;
+	font-weight: 600;
+}
+
+.filter-tab.active::after {
+	content: '';
+	position: absolute;
+	bottom: -20rpx;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 40rpx;
+	height: 4rpx;
+	background-color: #e94560;
+	border-radius: 2rpx;
+}
+
+.content-area {
+	flex: 1;
+	width: 750rpx;
+	padding: 28rpx;
+	padding-bottom: 180rpx;
+}
+
+.posts-list {
+	display: flex;
+	flex-direction: column;
+	gap: 24rpx;
+}
+
+.post-card {
+	background-color: #16213e;
+	border-radius: 28rpx;
+	padding: 28rpx;
+	border: 1rpx solid #1a1a4e;
+}
+
+.post-header {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin-bottom: 20rpx;
+}
+
+.post-avatar {
+	width: 76rpx;
+	height: 76rpx;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.avatar-emoji {
+	font-size: 32rpx;
+}
+
+.post-author-info {
+	flex: 1;
+	margin-left: 20rpx;
+}
+
+.author-name {
+	font-size: 26rpx;
+	font-weight: 600;
+	color: #ffffff;
+	display: block;
+}
+
+.post-time {
+	font-size: 22rpx;
+	color: #5a5a8a;
+	display: block;
+	margin-top: 4rpx;
+}
+
+.post-content {
+	font-size: 26rpx;
+	color: #c0c0e0;
+	line-height: 1.5;
+	display: block;
+	margin-bottom: 16rpx;
+}
+
+.post-images {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 12rpx;
+	margin-bottom: 16rpx;
+}
+
+.post-image {
+	height: 160rpx;
+	background: linear-gradient(135deg, #1a1a3e, #e94560);
+	border-radius: 16rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.image-placeholder {
+	font-size: 48rpx;
+	color: rgba(255, 255, 255, 0.3);
+}
+
+.post-actions {
+	display: flex;
+	flex-direction: row;
+	gap: 36rpx;
+}
+
+.action-item {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	color: #5a5a8a;
+	font-size: 24rpx;
+}
+
+.action-item.liked {
+	color: #e94560;
+}
+
+.action-count {
+	margin-left: 8rpx;
+}
+
+.loading-more,
+.no-more {
+	padding: 32rpx;
+	text-align: center;
+	color: #5a5a8a;
+	font-size: 24rpx;
+}
+
+.empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 100rpx 40rpx;
+}
+
+.empty-icon {
+	font-size: 80rpx;
+}
+
+.empty-text {
+	font-size: 26rpx;
+	color: #5a5a8a;
+	margin-top: 20rpx;
+}
+
+.fab {
+	position: fixed;
+	bottom: 140rpx;
+	right: 28rpx;
+	width: 92rpx;
+	height: 92rpx;
+	background-color: #e94560;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 8rpx 32rpx rgba(233, 69, 96, 0.5);
+}
+
+.fab text {
+	font-size: 44rpx;
+	color: #ffffff;
+	font-weight: 300;
+}
+
+.bottom-nav {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 100rpx;
+	background-color: #0f0f23;
+	border-top: 1rpx solid #1a1a3e;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.nav-item {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.nav-icon {
+	font-size: 40rpx;
+	color: #5a5a8a;
+}
+
+.nav-text {
+	font-size: 20rpx;
+	color: #5a5a8a;
+	margin-top: 4rpx;
+}
+
+.nav-item.active .nav-icon {
+	color: #e94560;
+}
+
+.nav-item.active .nav-text {
+	color: #e94560;
+}
+</style>
+

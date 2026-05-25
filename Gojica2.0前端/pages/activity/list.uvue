@@ -1,0 +1,411 @@
+﻿﻿<template>
+	<view class="activity-list-container">
+		<view class="top-nav">
+			<text class="nav-title"> 活动</text>
+			<view class="nav-right">
+				<text class="nav-icon" @click="goToMyActivities">📋</text>
+			</view>
+		</view>
+
+		<scroll-view class="filter-scroll" scroll-x="true">
+			<view class="filter-tags">
+				<view
+					class="filter-tag"
+					v-for="type in activityTypes"
+					:key="type.value"
+					:class="{ active: currentType === type.value }"
+					@click="selectType(type.value)"
+				>
+					<text>{{ type.label }}</text>
+				</view>
+			</view>
+		</scroll-view>
+
+		<scroll-view class="content-area" scroll-y="true" @scrolltolower="loadMore">
+			<view class="activity-list">
+				<view class="activity-card" v-for="activity in activities" :key="activity.id" @click="goToDetail(activity.id)">
+					<view class="activity-cover" :style="{ background: getActivityGradient(activity.type) }">
+						<text class="activity-emoji">{{ getActivityEmoji(activity.type) }}</text>
+						<view class="activity-status" :style="{ background: getStatusColor(activity.status) }">
+							<text>{{ getStatusText(activity.status) }}</text>
+						</view>
+					</view>
+					<view class="activity-body">
+						<text class="activity-title">{{ activity.title }}</text>
+						<view class="activity-meta">
+							<text class="meta-item">📅 {{ formatDateTime(activity.start_time) }}</text>
+							<text class="meta-item"> {{ activity.location }}</text>
+						</view>
+						<view class="activity-footer">
+							<view class="activity-price">
+								<text class="price-text">{{ activity.price || '免费' }}</text>
+								<text class="price-sub"> · {{ activity.current_participants || 0 }}/{{ activity.max_participants }}人</text>
+							</view>
+							<view class="signup-btn" v-if="activity.status === 'recruiting' && activity.current_participants < activity.max_participants" @click.stop="signupActivity(activity.id)">
+								<text>立即报名</text>
+							</view>
+							<view class="signup-btn disabled" v-else>
+								<text>{{ activity.status === 'recruiting' ? '已满员' : getStatusText(activity.status) }}</text>
+							</view>
+						</view>
+					</view>
+				</view>
+			</view>
+
+			<view class="loading-more" v-if="loading">
+				<text>加载中..</text>
+			</view>
+			<view class="no-more" v-if="!loading && noMore && activities.length > 0">
+				<text>没有更多了</text>
+			</view>
+			<view class="empty-state" v-if="!loading && activities.length === 0">
+				<text class="empty-icon">🎵</text>
+				<text class="empty-text">暂无活动</text>
+			</view>
+		</scroll-view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, onMounted } from 'vue'
+import { activityApi } from '../../common/utils/api.uts'
+import { ACTIVITY_TYPES } from '../../common/utils/theme'
+
+const activityTypes = ref(ACTIVITY_TYPES)
+const currentType = ref('')
+const activities = ref<any[]>([])
+const page = ref(1)
+const pageSize = 20
+const loading = ref(false)
+const noMore = ref(false)
+
+const getActivityGradient = (type: string): string => {
+	const gradients: Record<string, string> = {
+		performance: 'linear-gradient(135deg, #e94560, #8b1a34)',
+		competition: 'linear-gradient(135deg, #f39c12, #e67e22)',
+		rehearsal: 'linear-gradient(135deg, #3498db, #2980b9)',
+		course: 'linear-gradient(135deg, #9b59b6, #8e44ad)'
+	}
+	return gradients[type?.toLowerCase()] || 'linear-gradient(135deg, #16213e, #0f4a8a)'
+}
+
+const getActivityEmoji = (type: string): string => {
+	const emojis: Record<string, string> = {
+		performance: '',
+		competition: '',
+		rehearsal: '',
+		course: ''
+	}
+	return emojis[type?.toLowerCase()] || '🎵'
+}
+
+const getStatusColor = (status: string): string => {
+	const colors: Record<string, string> = {
+		recruiting: '#e94560',
+		in_progress: '#27ae60',
+		ended: '#5a5a8a'
+	}
+	return colors[status] || '#5a5a8a'
+}
+
+const getStatusText = (status: string): string => {
+	const texts: Record<string, string> = {
+		recruiting: '招募中',
+		in_progress: '进行中',
+		ended: '已结束'
+	}
+	return texts[status] || '未知'
+}
+
+const formatDateTime = (dateStr: string): string => {
+	if (!dateStr) return '待定'
+	const date = new Date(dateStr)
+	const month = date.getMonth() + 1
+	const day = date.getDate()
+	const hours = date.getHours().toString().padStart(2, '0')
+	const minutes = date.getMinutes().toString().padStart(2, '0')
+	return `${month}月${day}日${hours}:${minutes}`
+}
+
+const loadActivities = async (reset = false) => {
+	if (loading.value) return
+	if (reset) {
+		page.value = 1
+		noMore.value = false
+		activities.value = []
+	}
+
+	loading.value = true
+	try {
+		const params: any = {
+			page: page.value,
+			pageSize
+		}
+		if (currentType.value) {
+			params.type = currentType.value
+		}
+
+		const res = await activityApi.getList(params)
+		if (res && res.code === 1000) {
+			const list = res.data?.list || []
+			if (reset) {
+				activities.value = list
+			} else {
+				activities.value = [...activities.value, ...list]
+			}
+
+			if (list.length < pageSize) {
+				noMore.value = true
+			} else {
+				page.value++
+			}
+		}
+	} catch (e) {
+		console.error('Load activities error:', e)
+		uni.showToast({ title: '加载失败', icon: 'none' })
+	} finally {
+		loading.value = false
+	}
+}
+
+const selectType = (type: string) => {
+	currentType.value = type
+	loadActivities(true)
+}
+
+const loadMore = () => {
+	if (!noMore.value) {
+		loadActivities(false)
+	}
+}
+
+const goToDetail = (id: number) => {
+	uni.navigateTo({ url: `/pages/activity/detail?id=${id}` })
+}
+
+const goToMyActivities = () => {
+	uni.showToast({ title: '我的活动开发中', icon: 'none' })
+}
+
+const signupActivity = async (id: number) => {
+	try {
+		const res = await activityApi.signup(id)
+		if (res && (res.code === 1000 || res.code === 1001)) {
+			uni.showToast({ title: '报名成功', icon: 'success' })
+			loadActivities(true)
+		}
+	} catch (e) {
+		uni.showToast({ title: '报名失败', icon: 'none' })
+	}
+}
+
+onMounted(() => {
+	loadActivities(true)
+})
+</script>
+
+<style>
+.activity-list-container {
+	width: 750rpx;
+	min-height: 100vh;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: column;
+}
+
+.top-nav {
+	width: 750rpx;
+	height: 88rpx;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 28rpx;
+	border-bottom: 1rpx solid #1a1a4e;
+}
+
+.nav-title {
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #ffffff;
+}
+
+.nav-right {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.nav-icon {
+	font-size: 36rpx;
+}
+
+.filter-scroll {
+	width: 750rpx;
+	background-color: #0d0d1f;
+	border-bottom: 1rpx solid #1a1a4e;
+}
+
+.filter-tags {
+	display: flex;
+	flex-direction: row;
+	padding: 20rpx 28rpx;
+	white-space: nowrap;
+}
+
+.filter-tag {
+	background-color: #16213e;
+	color: #a0a0c0;
+	font-size: 24rpx;
+	padding: 12rpx 24rpx;
+	border-radius: 28rpx;
+	margin-right: 16rpx;
+	border: 1rpx solid #1a1a4e;
+}
+
+.filter-tag.active {
+	background-color: #e94560;
+	color: #ffffff;
+	border-color: #e94560;
+}
+
+.content-area {
+	flex: 1;
+	width: 750rpx;
+	padding: 28rpx;
+}
+
+.activity-list {
+	display: flex;
+	flex-direction: column;
+	gap: 24rpx;
+}
+
+.activity-card {
+	background-color: #16213e;
+	border-radius: 28rpx;
+	overflow: hidden;
+	border: 1rpx solid #1a1a4e;
+}
+
+.activity-cover {
+	width: 100%;
+	height: 220rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+.activity-emoji {
+	font-size: 64rpx;
+}
+
+.activity-status {
+	position: absolute;
+	top: 20rpx;
+	left: 20rpx;
+	padding: 8rpx 16rpx;
+	border-radius: 16rpx;
+}
+
+.activity-status text {
+	font-size: 20rpx;
+	color: #ffffff;
+}
+
+.activity-body {
+	padding: 24rpx;
+}
+
+.activity-title {
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #ffffff;
+	display: block;
+}
+
+.activity-meta {
+	display: flex;
+	flex-direction: row;
+	margin-top: 12rpx;
+}
+
+.meta-item {
+	font-size: 22rpx;
+	color: #a0a0c0;
+	margin-right: 24rpx;
+}
+
+.activity-footer {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 16rpx;
+}
+
+.activity-price {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.price-text {
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #e94560;
+}
+
+.price-sub {
+	font-size: 22rpx;
+	color: #a0a0c0;
+	margin-left: 8rpx;
+}
+
+.signup-btn {
+	background-color: #e94560;
+	border-radius: 28rpx;
+	padding: 12rpx 32rpx;
+}
+
+.signup-btn text {
+	font-size: 24rpx;
+	color: #ffffff;
+}
+
+.signup-btn.disabled {
+	background-color: #333333;
+}
+
+.signup-btn.disabled text {
+	color: #666666;
+}
+
+.loading-more,
+.no-more {
+	padding: 32rpx;
+	text-align: center;
+	color: #5a5a8a;
+	font-size: 24rpx;
+}
+
+.empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 100rpx 40rpx;
+}
+
+.empty-icon {
+	font-size: 80rpx;
+}
+
+.empty-text {
+	font-size: 26rpx;
+	color: #5a5a8a;
+	margin-top: 20rpx;
+}
+</style>
+

@@ -1,0 +1,92 @@
+/**
+ * Gojica 主题常量
+ */
+
+export const THEME = {
+	colors: {
+		primary: '#e94560',
+		primaryDark: '#8b1a34',
+		success: '#27ae60',
+		warning: '#f0ad4e',
+		error: '#dd524d',
+		wechat: '#07c160',
+		bgMain: '#0d0d1f',
+		bgSecondary: '#16213e',
+		bgNav: '#0f0f23',
+		border: '#1a1a4e',
+		textPrimary: '#ffffff',
+		textSecondary: '#a0a0c0',
+		textPlaceholder: '#5a5a8a'
+	},
+	sizes: {
+		fontSm: '12px',
+		fontBase: '14px',
+		fontLg: '16px',
+		fontXl: '20px',
+		fontXxl: '28px',
+		spacingSm: '8px',
+		spacingBase: '12px',
+		spacingLg: '16px',
+		spacingXl: '20px',
+		radiusSm: '8px',
+		radiusBase: '14px',
+		radiusLg: '20px',
+		radiusCircle: '50%'
+	},
+	gradients: {
+		primary: 'linear-gradient(135deg, #e94560 0%, #8b1a34 100%)',
+		card: 'linear-gradient(135deg, #16213e 0%, #1a1a3e 100%)'
+	}
+}
+
+export const MUSIC_STYLES = [
+	{ label: 'Rock', value: 'rock', emoji: '🎸' },
+	{ label: 'Jazz', value: 'jazz', emoji: '🎷' },
+	{ label: 'Pop', value: 'pop', emoji: '🎤' },
+	{ label: 'Folk', value: 'folk', emoji: '🎻' },
+	{ label: 'Metal', value: 'metal', emoji: '🤘' },
+	{ label: 'Blues', value: 'blues', emoji: '🎺' },
+	{ label: 'Electronic', value: 'electronic', emoji: '🎹' }
+]
+
+export const INSTRUMENTS = [
+	{ label: '吉他手', value: 'guitar', emoji: '🎸' },
+	{ label: '鼓手', value: 'drum', emoji: '🥁' },
+	{ label: '键盘手', value: 'keyboard', emoji: '🎹' },
+	{ label: '主唱', value: 'vocal', emoji: '🎤' },
+	{ label: '贝斯手', value: 'bass', emoji: '🎸' },
+	{ label: '小号手', value: 'trumpet', emoji: '🎺' }
+]
+
+export const ACTIVITY_TYPES = [
+	{ label: '全部', value: '' },
+	{ label: '演出', value: 'performance' },
+	{ label: '排练', value: 'rehearsal' },
+	{ label: '比赛', value: 'competition' },
+	{ label: '课程', value: 'course' }
+]
+
+export const PRODUCT_CATEGORIES = [
+	{ label: '全部', value: '' },
+	{ label: '吉他', value: 'guitar' },
+	{ label: '鼓', value: 'drum' },
+	{ label: '键盘', value: 'keyboard' },
+	{ label: '效果器', value: 'effect' },
+	{ label: '其他', value: 'other' }
+]
+
+export const TAB_BAR = [
+	{ text: '首页', icon: '🏠', activeIcon: '🏠', path: '/pages/home/index' },
+	{ text: '乐队', icon: '🎸', activeIcon: '🎸', path: '/pages/band/list' },
+	{ text: '广场', icon: '✨', activeIcon: '✨', path: '/pages/square/index' },
+	{ text: '市场', icon: '🛒', activeIcon: '🛒', path: '/pages/market/list' },
+	{ text: '我的', icon: '👤', activeIcon: '👤', path: '/pages/user/index' }
+]
+
+export const STATUS_TEXT: Record<string, { text: string; color: string }> = {
+	recruiting: { text: '招募中', color: '#e94560' },
+	in_progress: { text: '进行中', color: '#27ae60' },
+	ended: { text: '已结束', color: '#5a5a8a' }
+}
+
+export default THEME

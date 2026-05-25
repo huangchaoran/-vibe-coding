@@ -1,0 +1,161 @@
+{
+	"pages": [
+		{
+			"path": "pages/home/index",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "首页"
+			}
+		},
+		{
+			"path": "pages/login/index",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "登录"
+			}
+		},
+		{
+			"path": "pages/band/list",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "乐队"
+			}
+		},
+		{
+			"path": "pages/band/detail",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "乐队详情"
+			}
+		},
+		{
+			"path": "pages/band/create",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "创建乐队"
+			}
+		},
+		{
+			"path": "pages/activity/list",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "活动"
+			}
+		},
+		{
+			"path": "pages/activity/detail",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "活动详情"
+			}
+		},
+		{
+			"path": "pages/square/index",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "广场"
+			}
+		},
+		{
+			"path": "pages/square/post",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "发布动态"
+			}
+		},
+		{
+			"path": "pages/market/list",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "二手市场"
+			}
+		},
+		{
+			"path": "pages/market/detail",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "商品详情"
+			}
+		},
+		{
+			"path": "pages/user/index",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "个人中心"
+			}
+		},
+		{
+			"path": "pages/user/profile",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "编辑资料"
+			}
+		},
+		{
+			"path": "pages/recruit/list",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "招募"
+			}
+		},
+		{
+			"path": "pages/room/list",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "排练室"
+			}
+		},
+		{
+			"path": "pages/search/index",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "搜索"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "white",
+		"navigationBarTitleText": "Gojica",
+		"navigationBarBackgroundColor": "#0f0f23",
+		"backgroundColor": "#0d0d1f"
+	},
+	"tabBar": {
+		"color": "#5a5a8a",
+		"selectedColor": "#e94560",
+		"backgroundColor": "#0f0f23",
+		"borderStyle": "black",
+		"list": [
+			{
+				"text": "首页",
+				"pagePath": "pages/home/index",
+				"iconPath": "static/tab-home.png",
+				"selectedIconPath": "static/tab-home-active.png"
+			},
+			{
+				"text": "乐队",
+				"pagePath": "pages/band/list",
+				"iconPath": "static/tab-band.png",
+				"selectedIconPath": "static/tab-band-active.png"
+			},
+			{
+				"text": "广场",
+				"pagePath": "pages/square/index",
+				"iconPath": "static/tab-square.png",
+				"selectedIconPath": "static/tab-square-active.png"
+			},
+			{
+				"text": "市场",
+				"pagePath": "pages/market/list",
+				"iconPath": "static/tab-market.png",
+				"selectedIconPath": "static/tab-market-active.png"
+			},
+			{
+				"text": "我的",
+				"pagePath": "pages/user/index",
+				"iconPath": "static/tab-user.png",
+				"selectedIconPath": "static/tab-user-active.png"
+			}
+		]
+	},
+	"uniIdRouter": {}
+}

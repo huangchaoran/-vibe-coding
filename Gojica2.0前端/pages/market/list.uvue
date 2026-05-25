@@ -1,0 +1,432 @@
+<template>
+	<view class="market-list-container">
+		<view class="top-nav">
+			<text class="nav-title"> 二手市场</text>
+			<view class="nav-right">
+				<text class="nav-icon" @click="goToSearch"></text>
+				<text class="nav-icon" @click="goToPublish">+</text>
+			</view>
+		</view>
+
+		<view class="search-bar" @click="goToSearch">
+			<text class="search-icon"></text>
+			<text class="search-placeholder">搜索乐器、器材..</text>
+		</view>
+
+		<scroll-view class="filter-scroll" scroll-x="true">
+			<view class="filter-tags">
+				<view
+					class="filter-tag"
+					v-for="cat in categories"
+					:key="cat.value"
+					:class="{ active: currentCategory === cat.value }"
+					@click="selectCategory(cat.value)"
+				>
+					<text>{{ cat.label }}</text>
+				</view>
+			</view>
+		</scroll-view>
+
+		<scroll-view class="content-area" scroll-y="true" @scrolltolower="loadMore">
+			<view class="product-grid">
+				<view class="product-card" v-for="product in products" :key="product.id" @click="goToDetail(product.id)">
+					<view class="product-cover" :style="{ background: getProductGradient(product.category) }">
+						<text class="product-emoji">{{ getProductEmoji(product.category) }}</text>
+						<view class="favorite-btn">
+							<text>{{ product.isFavorite ? '❤️' : '🤍' }}</text>
+						</view>
+					</view>
+					<view class="product-info">
+						<text class="product-title">{{ product.title }}</text>
+						<view class="product-price">
+							<text class="price-current">¥{{ product.price }}</text>
+							<text class="price-original" v-if="product.original_price">¥{{ product.original_price }}</text>
+						</view>
+						<text class="product-seller">{{ product.seller?.nickname || '匿名卖家' }}</text>
+					</view>
+				</view>
+			</view>
+
+			<view class="loading-more" v-if="loading">
+				<text>加载中..</text>
+			</view>
+			<view class="no-more" v-if="!loading && noMore">
+				<text>没有更多了</text>
+			</view>
+			<view class="empty-state" v-if="!loading && products.length === 0">
+				<text class="empty-icon"></text>
+				<text class="empty-text">暂无商品</text>
+			</view>
+		</scroll-view>
+
+		<view class="bottom-nav">
+			<view class="nav-item" @click="switchTab(0)">
+				<text class="nav-icon">🏠</text>
+				<text class="nav-text">首页</text>
+			</view>
+			<view class="nav-item" @click="switchTab(1)">
+				<text class="nav-icon"></text>
+				<text class="nav-text">乐队</text>
+			</view>
+			<view class="nav-item" @click="switchTab(2)">
+				<text class="nav-icon"></text>
+				<text class="nav-text">广场</text>
+			</view>
+			<view class="nav-item active" @click="switchTab(3)">
+				<text class="nav-icon"></text>
+				<text class="nav-text">市场</text>
+			</view>
+			<view class="nav-item" @click="switchTab(4)">
+				<text class="nav-icon"></text>
+				<text class="nav-text">我的</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, onMounted } from 'vue'
+import { productApi } from '../../common/utils/api.uts'
+import { PRODUCT_CATEGORIES } from '../../common/utils/theme'
+
+const categories = ref(PRODUCT_CATEGORIES)
+const currentCategory = ref('')
+const products = ref<any[]>([])
+const page = ref(1)
+const pageSize = 20
+const loading = ref(false)
+const noMore = ref(false)
+
+const getProductGradient = (category: string): string => {
+	const gradients: Record<string, string> = {
+		guitar: 'linear-gradient(135deg, #e94560, #8b1a34)',
+		drum: 'linear-gradient(135deg, #f39c12, #e67e22)',
+		keyboard: 'linear-gradient(135deg, #9b59b6, #8e44ad)',
+		effect: 'linear-gradient(135deg, #3498db, #2980b9)',
+		other: 'linear-gradient(135deg, #27ae60, #2ecc71)'
+	}
+	return gradients[category?.toLowerCase()] || 'linear-gradient(135deg, #16213e, #0f4a8a)'
+}
+
+const getProductEmoji = (category: string): string => {
+	const emojis: Record<string, string> = {
+		guitar: '',
+		drum: '',
+		keyboard: '🎹',
+		effect: '🎛',
+		other: '🎵'
+	}
+	return emojis[category?.toLowerCase()] || '🎵'
+}
+
+const loadProducts = async (reset = false) => {
+	if (loading.value) return
+	if (reset) {
+		page.value = 1
+		noMore.value = false
+		products.value = []
+	}
+
+	loading.value = true
+	try {
+		const params: any = {
+			page: page.value,
+			pageSize
+		}
+		if (currentCategory.value) {
+			params.category = currentCategory.value
+		}
+
+		const res = await productApi.getList(params)
+		if (res && res.code === 1000) {
+			const list = res.data?.list || []
+			if (reset) {
+				products.value = list
+			} else {
+				products.value = [...products.value, ...list]
+			}
+
+			if (list.length < pageSize) {
+				noMore.value = true
+			} else {
+				page.value++
+			}
+		}
+	} catch (e) {
+		console.error('Load products error:', e)
+		uni.showToast({ title: '加载失败', icon: 'none' })
+	} finally {
+		loading.value = false
+	}
+}
+
+const selectCategory = (category: string) => {
+	currentCategory.value = category
+	loadProducts(true)
+}
+
+const loadMore = () => {
+	if (!noMore.value) {
+		loadProducts(false)
+	}
+}
+
+const goToDetail = (id: number) => {
+	uni.navigateTo({ url: `/pages/market/detail?id=${id}` })
+}
+
+const goToSearch = () => {
+	uni.navigateTo({ url: '/pages/search/index' })
+}
+
+const goToPublish = () => {
+	uni.showToast({ title: '发布商品开发中', icon: 'none' })
+}
+
+const switchTab = (index: number) => {
+	const tabs = [
+		'/pages/home/index',
+		'/pages/band/list',
+		'/pages/square/index',
+		'/pages/market/list',
+		'/pages/user/index'
+	]
+	if (index === 3) return
+	uni.switchTab({ url: tabs[index] })
+}
+
+onMounted(() => {
+	loadProducts(true)
+})
+</script>
+
+<style>
+.market-list-container {
+	width: 750rpx;
+	min-height: 100vh;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: column;
+}
+
+.top-nav {
+	width: 750rpx;
+	height: 88rpx;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 28rpx;
+	border-bottom: 1rpx solid #1a1a4e;
+}
+
+.nav-title {
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #ffffff;
+}
+
+.nav-right {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.nav-icon {
+	font-size: 36rpx;
+	margin-left: 24rpx;
+}
+
+.search-bar {
+	margin: 20rpx 28rpx;
+	background-color: #1a1a3e;
+	border-radius: 40rpx;
+	padding: 16rpx 28rpx;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.search-icon {
+	font-size: 28rpx;
+	margin-right: 16rpx;
+}
+
+.search-placeholder {
+	font-size: 26rpx;
+	color: #5a5a8a;
+}
+
+.filter-scroll {
+	width: 750rpx;
+	background-color: #0d0d1f;
+	border-bottom: 1rpx solid #1a1a4e;
+}
+
+.filter-tags {
+	display: flex;
+	flex-direction: row;
+	padding: 20rpx 28rpx;
+	white-space: nowrap;
+}
+
+.filter-tag {
+	background-color: #16213e;
+	color: #a0a0c0;
+	font-size: 24rpx;
+	padding: 12rpx 24rpx;
+	border-radius: 28rpx;
+	margin-right: 16rpx;
+	border: 1rpx solid #1a1a4e;
+}
+
+.filter-tag.active {
+	background-color: #e94560;
+	color: #ffffff;
+	border-color: #e94560;
+}
+
+.content-area {
+	flex: 1;
+	width: 750rpx;
+	padding: 28rpx;
+	padding-bottom: 100rpx;
+}
+
+.product-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 20rpx;
+}
+
+.product-card {
+	background-color: #16213e;
+	border-radius: 28rpx;
+	overflow: hidden;
+	border: 1rpx solid #1a1a4e;
+}
+
+.product-cover {
+	width: 100%;
+	height: 240rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+.product-emoji {
+	font-size: 72rpx;
+}
+
+.favorite-btn {
+	position: absolute;
+	top: 16rpx;
+	right: 16rpx;
+}
+
+.product-info {
+	padding: 20rpx;
+}
+
+.product-title {
+	font-size: 24rpx;
+	font-weight: 600;
+	color: #ffffff;
+	display: block;
+}
+
+.product-price {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin-top: 8rpx;
+}
+
+.price-current {
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #e94560;
+}
+
+.price-original {
+	font-size: 22rpx;
+	color: #5a5a8a;
+	text-decoration: line-through;
+	margin-left: 8rpx;
+}
+
+.product-seller {
+	font-size: 22rpx;
+	color: #a0a0c0;
+	display: block;
+	margin-top: 8rpx;
+}
+
+.loading-more,
+.no-more {
+	padding: 32rpx;
+	text-align: center;
+	color: #5a5a8a;
+	font-size: 24rpx;
+}
+
+.empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 100rpx 40rpx;
+}
+
+.empty-icon {
+	font-size: 80rpx;
+}
+
+.empty-text {
+	font-size: 26rpx;
+	color: #5a5a8a;
+	margin-top: 20rpx;
+}
+
+.bottom-nav {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 100rpx;
+	background-color: #0f0f23;
+	border-top: 1rpx solid #1a1a3e;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.nav-item {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.nav-icon {
+	font-size: 40rpx;
+	color: #5a5a8a;
+}
+
+.nav-text {
+	font-size: 20rpx;
+	color: #5a5a8a;
+	margin-top: 4rpx;
+}
+
+.nav-item.active .nav-icon {
+	color: #e94560;
+}
+
+.nav-item.active .nav-text {
+	color: #e94560;
+}
+</style>
+

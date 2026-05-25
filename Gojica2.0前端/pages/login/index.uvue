@@ -1,0 +1,261 @@
+﻿﻿﻿﻿<template>
+	<view class="login-container">
+		<view class="login-content">
+			<view class="logo-section">
+				<text class="logo"></text>
+				<text class="app-name">GOJICA</text>
+				<text class="slogan">发现音乐·连接人脉·玩转乐圈</text>
+			</view>
+
+			<view class="form-section">
+				<view class="input-group">
+					<text class="input-icon"></text>
+					<input
+						class="input-field"
+						type="number"
+						v-model="phone"
+						placeholder="请输入手机号"
+						placeholder-class="placeholder"
+						maxlength="11"
+					/>
+				</view>
+
+				<view class="input-group">
+					<text class="input-icon"></text>
+					<input
+						class="input-field"
+						type="number"
+						v-model="code"
+						placeholder="请输入验证码"
+						placeholder-class="placeholder"
+						maxlength="6"
+					/>
+					<view class="code-btn" @click="sendCode" v-if="!counting">
+						<text>获取验证码</text>
+					</view>
+					<view class="code-btn disabled" v-else>
+						<text>{{ countdown }}s</text>
+					</view>
+				</view>
+
+				<view class="wechat-btn" @click="wechatLogin">
+					<text class="wechat-icon"></text>
+					<text class="wechat-text">微信一键登录</text>
+				</view>
+
+				<view class="divider">
+					<view class="divider-line"></view>
+					<text class="divider-text">或</text>
+					<view class="divider-line"></view>
+				</view>
+
+				<view class="dev-btn" @click="devLogin">
+					<text>开发模式登录(调试)</text>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+import { authApi } from '../../common/utils/api.uts'
+import { THEME } from '../../common/utils/theme'
+
+const phone = ref('')
+const code = ref('')
+const counting = ref(false)
+const countdown = ref(60)
+
+const sendCode = () => {
+	if (!phone.value || phone.value.length !== 11) {
+		uni.showToast({ title: '请输入正确的手机号', icon: 'none' })
+		return
+	}
+	uni.showToast({ title: '验证码已发送', icon: 'success' })
+	counting.value = true
+	countdown.value = 60
+	const timer = setInterval(() => {
+		countdown.value--
+		if (countdown.value <= 0) {
+			counting.value = false
+			clearInterval(timer)
+		}
+	}, 1000)
+}
+
+const wechatLogin = () => {
+	uni.showToast({ title: '微信登录开发中', icon: 'none' })
+}
+
+const devLogin = async () => {
+	if (!phone.value) {
+		uni.showToast({ title: '请输入手机号', icon: 'none' })
+		return
+	}
+	try {
+		uni.showLoading({ title: '登录中...' })
+		const res = await authApi.login(phone.value, 'fan')
+		uni.hideLoading()
+		if (res && (res.code === 2000 || res.code === 1000)) {
+			uni.setStorageSync('token', res.data?.token)
+			uni.setStorageSync('userInfo', res.data?.userInfo || {})
+			uni.switchTab({ url: '/pages/home/index' })
+		}
+	} catch (e) {
+		uni.hideLoading()
+		console.error('Login error:', e)
+	}
+}
+</script>
+
+<style>
+.login-container {
+	width: 750rpx;
+	min-height: 100vh;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 0 48rpx;
+}
+
+.login-content {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.logo-section {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-bottom: 80rpx;
+}
+
+.logo {
+	font-size: 108rpx;
+	margin-bottom: 28rpx;
+}
+
+.app-name {
+	font-size: 56rpx;
+	font-weight: 800;
+	color: #e94560;
+	letter-spacing: 6rpx;
+}
+
+.slogan {
+	font-size: 26rpx;
+	color: #a0a0c0;
+	margin-top: 12rpx;
+}
+
+.form-section {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+.input-group {
+	width: 100%;
+	background-color: #16213e;
+	border: 1rpx solid #1a1a4e;
+	border-radius: 24rpx;
+	padding: 28rpx 32rpx;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin-bottom: 24rpx;
+}
+
+.input-icon {
+	font-size: 28rpx;
+	margin-right: 20rpx;
+}
+
+.input-field {
+	flex: 1;
+	font-size: 28rpx;
+	color: #ffffff;
+}
+
+.placeholder {
+	color: #5a5a8a;
+	font-size: 28rpx;
+}
+
+.code-btn {
+	background-color: #e94560;
+	border-radius: 24rpx;
+	padding: 16rpx 24rpx;
+	font-size: 24rpx;
+	color: #ffffff;
+}
+
+.code-btn.disabled {
+	background-color: #333333;
+	color: #666666;
+}
+
+.wechat-btn {
+	width: 100%;
+	background-color: #07c160;
+	border-radius: 48rpx;
+	padding: 28rpx;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	margin-top: 24rpx;
+}
+
+.wechat-icon {
+	font-size: 32rpx;
+	margin-right: 16rpx;
+}
+
+.wechat-text {
+	font-size: 32rpx;
+	font-weight: 600;
+	color: #ffffff;
+}
+
+.divider {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin: 32rpx 0;
+}
+
+.divider-line {
+	flex: 1;
+	height: 1rpx;
+	background-color: #1a1a3e;
+}
+
+.divider-text {
+	color: #5a5a8a;
+	font-size: 24rpx;
+	margin: 0 20rpx;
+}
+
+.dev-btn {
+	width: 100%;
+	background-color: transparent;
+	border: 1rpx solid #1a1a4e;
+	border-radius: 48rpx;
+	padding: 24rpx;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+}
+
+.dev-btn text {
+	color: #a0a0c0;
+	font-size: 28rpx;
+}
+</style>

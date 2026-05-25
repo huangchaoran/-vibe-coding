@@ -1,0 +1,768 @@
+<template>
+	<view class="home-container">
+		<view class="top-nav">
+			<view class="nav-left">
+				<text class="logo-text">🎸</text>
+				<text class="app-title">Gojica</text>
+			</view>
+			<view class="nav-right">
+				<text class="nav-icon" @click="goToNotification">🔔</text>
+				<text class="nav-icon" @click="goToSearch">🔍</text>
+			</view>
+		</view>
+
+		<scroll-view class="content-area" scroll-y="true">
+			<view class="search-bar" @click="goToSearch">
+				<text class="search-icon">🔍</text>
+				<text class="search-placeholder">搜索乐队、活动、商品...</text>
+			</view>
+
+			<view class="banner" v-if="banners.length > 0">
+				<swiper class="banner-swiper" indicator-dots="true" autoplay="true" interval="3000" circular="true">
+					<swiper-item v-for="(banner, index) in banners" :key="index">
+						<view class="banner-item" :style="{ background: banner.bgGradient }">
+							<text class="banner-emoji">{{ banner.emoji }}</text>
+							<view class="banner-info">
+								<text class="banner-title">{{ banner.title }}</text>
+								<text class="banner-sub">{{ banner.sub }}</text>
+							</view>
+							<view class="banner-badge">
+								<text>{{ banner.badge }}</text>
+							</view>
+						</view>
+					</swiper-item>
+				</swiper>
+			</view>
+
+			<view class="stats-row">
+				<view class="stat-card" @click="goToBands">
+					<text class="stat-num">{{ formatNumber(stats.bandCount) }}</text>
+					<text class="stat-label">乐队</text>
+				</view>
+				<view class="stat-card" @click="goToActivities">
+					<text class="stat-num">{{ formatNumber(stats.activityCount) }}</text>
+					<text class="stat-label">活动</text>
+				</view>
+				<view class="stat-card">
+					<text class="stat-num">{{ formatNumber(stats.userCount) }}</text>
+					<text class="stat-label">音乐人</text>
+				</view>
+				<view class="stat-card" @click="goToRecruit">
+					<text class="stat-num">{{ formatNumber(stats.recruitCount) }}</text>
+					<text class="stat-label">招募</text>
+				</view>
+			</view>
+
+			<view class="section">
+				<view class="section-header">
+					<text class="section-title">🔥 热门乐队</text>
+					<text class="section-more" @click="goToBands">查看全部 ›</text>
+				</view>
+				<scroll-view class="band-scroll" scroll-x="true">
+					<view class="band-card" v-for="band in hotBands" :key="band.id" @click="goToBandDetail(band.id)">
+						<view class="band-avatar" :style="{ background: getBandGradient(band.style) }">
+							<text class="band-emoji">{{ getBandEmoji(band.style) }}</text>
+						</view>
+						<text class="band-name">{{ band.name }}</text>
+						<text class="band-style">{{ band.style }} · {{ band.member_count || 0 }}人</text>
+						<view class="band-follow-btn" @click.stop="toggleFollow(band)">
+							<text>{{ band.isFollowed ? '已关注' : '+ 关注' }}</text>
+						</view>
+					</view>
+				</scroll-view>
+			</view>
+
+			<view class="section">
+				<view class="section-header">
+					<text class="section-title">🎉 近期活动</text>
+					<text class="section-more" @click="goToActivities">查看全部 ›</text>
+				</view>
+				<view class="activity-list">
+					<view class="activity-card" v-for="activity in activities" :key="activity.id" @click="goToActivityDetail(activity.id)">
+						<view class="activity-cover" :style="{ background: getActivityGradient(activity.type) }">
+							<text class="activity-emoji">{{ getActivityEmoji(activity.type) }}</text>
+							<view class="activity-status" :style="{ background: getStatusColor(activity.status) }">
+								<text>{{ getStatusText(activity.status) }}</text>
+							</view>
+						</view>
+						<view class="activity-body">
+							<text class="activity-title">{{ activity.title }}</text>
+							<view class="activity-meta">
+								<text class="meta-item">📅 {{ formatDate(activity.start_time) }}</text>
+								<text class="meta-item">{{ activity.location || '待定' }}</text>
+							</view>
+							<view class="activity-footer">
+								<view class="activity-price">
+									<text class="price-text">{{ activity.price || '免费' }}</text>
+									<text class="price-sub">·{{ activity.current_participants || 0 }}/{{ activity.max_participants }}人</text>
+								</view>
+								<view class="signup-btn" v-if="isActivitySigned(activity.id)" @click.stop="signupActivity(activity)">
+									<text>已报名</text>
+								</view>
+								<view class="signup-btn" v-else-if="activity.status === 'recruiting'" @click.stop="signupActivity(activity)">
+									<text>立即报名</text>
+								</view>
+								<view class="signup-btn disabled" v-else>
+									<text>{{ getStatusText(activity.status) }}</text>
+								</view>
+							</view>
+						</view>
+					</view>
+				</view>
+			</view>
+		</scroll-view>
+
+		<view class="bottom-nav">
+			<view class="nav-item active" @click="switchTab(0)">
+				<text class="nav-icon">🏠</text>
+				<text class="nav-text">首页</text>
+			</view>
+			<view class="nav-item" @click="switchTab(1)">
+				<text class="nav-icon">🎸</text>
+				<text class="nav-text">乐队</text>
+			</view>
+			<view class="nav-item" @click="switchTab(2)">
+				<text class="nav-icon">✨</text>
+				<text class="nav-text">广场</text>
+			</view>
+			<view class="nav-item" @click="switchTab(3)">
+				<text class="nav-icon">🛒</text>
+				<text class="nav-text">市场</text>
+			</view>
+			<view class="nav-item" @click="switchTab(4)">
+				<text class="nav-icon">👤</text>
+				<text class="nav-text">我的</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, onMounted } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
+import { homeApi, bandApi, activityApi } from '../../common/utils/api.uts'
+
+const stats = ref({
+	bandCount: 0,
+	userCount: 0,
+	activityCount: 0,
+	recruitCount: 0
+})
+
+const banners = ref([
+	{ emoji: '🎤', title: '周末Live House 音乐节', sub: '5月20日 · 北京三里屯', badge: '活动推荐', bgGradient: 'linear-gradient(135deg, #e94560, #8b1a34)' },
+	{ emoji: '🎸', title: '独立音乐人征集计划', sub: '展示你的音乐才华', badge: '音乐征集', bgGradient: 'linear-gradient(135deg, #16213e, #0f4a8a)' },
+	{ emoji: '🎹', title: '乐队排练室优惠季', sub: '全场8折起', badge: '优惠活动', bgGradient: 'linear-gradient(135deg, #3d1a4e, #8b1a34)' }
+])
+
+const hotBands = ref<any[]>([])
+const activities = ref<any[]>([])
+const signedActivityIds = ref<number[]>([])
+
+const formatNumber = (num: number): string => {
+	if (!num || num === undefined || num === null) {
+		return '0'
+	}
+	if (num >= 1000) {
+		return (num / 1000).toFixed(1) + 'k'
+	}
+	return num.toString()
+}
+
+const getBandGradient = (style: string): string => {
+	const gradients: Record<string, string> = {
+		rock: 'linear-gradient(135deg, #e94560, #8b1a34)',
+		jazz: 'linear-gradient(135deg, #9b59b6, #8e44ad)',
+		pop: 'linear-gradient(135deg, #3498db, #2980b9)',
+		folk: 'linear-gradient(135deg, #27ae60, #2ecc71)',
+		metal: 'linear-gradient(135deg, #34495e, #2c3e50)',
+		blues: 'linear-gradient(135deg, #f39c12, #e67e22)'
+	}
+	return gradients[style?.toLowerCase()] || 'linear-gradient(135deg, #e94560, #8b1a34)'
+}
+
+const getBandEmoji = (style: string): string => {
+	const emojis: Record<string, string> = {
+		rock: '🎸',
+		jazz: '🎷',
+		pop: '🎤',
+		folk: '🎻',
+		metal: '🤘',
+		blues: '🎺'
+	}
+	return emojis[style?.toLowerCase()] || '🎸'
+}
+
+const getActivityGradient = (type: string): string => {
+	const gradients: Record<string, string> = {
+		performance: 'linear-gradient(135deg, #e94560, #8b1a34)',
+		competition: 'linear-gradient(135deg, #f39c12, #e67e22)',
+		rehearsal: 'linear-gradient(135deg, #3498db, #2980b9)',
+		course: 'linear-gradient(135deg, #9b59b6, #8e44ad)'
+	}
+	return gradients[type?.toLowerCase()] || 'linear-gradient(135deg, #16213e, #0f4a8a)'
+}
+
+const getActivityEmoji = (type: string): string => {
+	const emojis: Record<string, string> = {
+		performance: '🎤',
+		competition: '🏆',
+		rehearsal: '🎹',
+		course: '📚'
+	}
+	return emojis[type?.toLowerCase()] || '🎵'
+}
+
+const getStatusColor = (status: string): string => {
+	const colors: Record<string, string> = {
+		recruiting: '#e94560',
+		in_progress: '#27ae60',
+		ended: '#5a5a8a'
+	}
+	return colors[status] || '#5a5a8a'
+}
+
+const getStatusText = (status: string): string => {
+	const texts: Record<string, string> = {
+		recruiting: '招募中',
+		in_progress: '进行中',
+		ended: '已结束'
+	}
+	return texts[status] || '未知'
+}
+
+const formatDate = (dateStr: string): string => {
+	if (!dateStr) return '待定'
+	const date = new Date(dateStr)
+	const month = date.getMonth() + 1
+	const day = date.getDate()
+	return month + '月' + day + '日'
+}
+
+const loadData = async () => {
+	try {
+		uni.showLoading({ title: '加载中...' })
+		const [statsRes, bandsRes, activitiesRes] = await Promise.all([
+			homeApi.getStats(),
+			homeApi.getBands(),
+			homeApi.getActivities()
+		])
+
+		if (statsRes && (statsRes.code === 1000 || statsRes.code === 2000)) {
+			stats.value = statsRes.data || {}
+		}
+		if (bandsRes && (bandsRes.code === 1000 || bandsRes.code === 2000)) {
+			const bandList = bandsRes.data || []
+			hotBands.value = Array.isArray(bandList) ? bandList.slice(0, 6) : []
+		}
+		if (activitiesRes && (activitiesRes.code === 1000 || activitiesRes.code === 2000)) {
+			const actList = activitiesRes.data || []
+			activities.value = Array.isArray(actList) ? actList.slice(0, 5) : []
+		}
+		uni.hideLoading()
+	} catch (err) {
+		console.error('Load home data error:', err)
+		uni.hideLoading()
+		uni.showToast({ title: '加载失败', icon: 'none' })
+	}
+}
+
+const goToNotification = () => {
+	uni.showToast({ title: '通知功能开发中', icon: 'none' })
+}
+
+const goToSearch = () => {
+	uni.navigateTo({ url: '/pages/search/index' })
+}
+
+const goToBands = () => {
+	uni.switchTab({ url: '/pages/band/list' })
+}
+
+const goToActivities = () => {
+	uni.navigateTo({ url: '/pages/activity/list' })
+}
+
+const goToRecruit = () => {
+	uni.navigateTo({ url: '/pages/recruit/list' })
+}
+
+const goToBandDetail = (id: number) => {
+	uni.navigateTo({ url: '/pages/band/detail?id=' + id })
+}
+
+const goToActivityDetail = (id: number) => {
+	uni.navigateTo({ url: '/pages/activity/detail?id=' + id })
+}
+
+const toggleFollow = async (band: any) => {
+	try {
+		if (band.isFollowed) {
+			// 已关注 -> 取消关注
+			const unfollowRes = await bandApi.unfollow(band.id)
+			if (unfollowRes && (unfollowRes.code === 1000 || unfollowRes.code === 1001)) {
+				band.isFollowed = false
+				uni.showToast({ title: '已取消关注', icon: 'success' })
+			} else {
+				uni.showToast({ title: '操作失败', icon: 'none' })
+			}
+		} else {
+			// 未关注 -> 添加关注
+			const followRes = await bandApi.follow(band.id)
+			if (followRes && (followRes.code === 1000 || followRes.code === 1001)) {
+				band.isFollowed = true
+				uni.showToast({ title: '关注成功', icon: 'success' })
+			} else {
+				uni.showToast({ title: '操作失败', icon: 'none' })
+			}
+		}
+	} catch (e) {
+		uni.showToast({ title: '操作失败', icon: 'none' })
+	}
+}
+
+const checkUserActivities = async () => {
+	try {
+		const res = await activityApi.getUserActivities()
+		if (res && res.code === 1000 && res.data) {
+			const list = res.data.list || res.data || []
+			signedActivityIds.value = list.map((a: any) => a.id)
+		}
+	} catch (e) {
+		console.log('Check activities error:', e)
+	}
+}
+
+const signupActivity = async (activity: any) => {
+	try {
+		const res = await activityApi.signup(activity.id)
+		if (res && (res.code === 1000 || res.code === 1001)) {
+			uni.showToast({ title: '报名成功', icon: 'success' })
+			if (!signedActivityIds.value.includes(activity.id)) {
+				signedActivityIds.value.push(activity.id)
+			}
+			if (activity.current_participants !== undefined) {
+				activity.current_participants++
+			}
+		}
+	} catch (e: any) {
+		if (e && e.code === 3005 && e.message && e.message.includes('已报名')) {
+			uni.showToast({ title: '您已报名该活动', icon: 'none' })
+			if (!signedActivityIds.value.includes(activity.id)) {
+				signedActivityIds.value.push(activity.id)
+			}
+		} else {
+			uni.showToast({ title: '报名失败', icon: 'none' })
+		}
+	}
+}
+
+const isActivitySigned = (activityId: number): boolean => {
+	return signedActivityIds.value.includes(activityId)
+}
+
+const switchTab = (index: number) => {
+	const tabs = ['/pages/home/index', '/pages/band/list', '/pages/square/index', '/pages/market/list', '/pages/user/index']
+	if (index !== 0) {
+		uni.switchTab({ url: tabs[index] })
+	}
+}
+
+onMounted(() => {
+	loadData()
+	checkUserActivities()
+})
+
+onShow(() => {
+	checkUserActivities()
+})
+</script>
+
+<style lang="scss">
+.home-container {
+	min-height: 100vh;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: column;
+}
+
+.top-nav {
+	width: 750rpx;
+	height: 88rpx;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 28rpx;
+	border-bottom: 1rpx solid #1a1a4e;
+}
+
+.nav-left {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.logo-text {
+	font-size: 48rpx;
+}
+
+.app-title {
+	font-size: 36rpx;
+	font-weight: 700;
+	color: #e94560;
+	margin-left: 8rpx;
+}
+
+.nav-right {
+	display: flex;
+	flex-direction: row;
+	gap: 24rpx;
+}
+
+.nav-icon {
+	font-size: 40rpx;
+}
+
+.content-area {
+	flex: 1;
+	padding: 24rpx 28rpx;
+}
+
+.search-bar {
+	background-color: #16213e;
+	border-radius: 50rpx;
+	padding: 20rpx 28rpx;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin-bottom: 24rpx;
+}
+
+.search-icon {
+	font-size: 28rpx;
+	margin-right: 16rpx;
+	color: #5a5a8a;
+}
+
+.search-placeholder {
+	font-size: 28rpx;
+	color: #5a5a8a;
+}
+
+.banner {
+	margin-bottom: 24rpx;
+}
+
+.banner-swiper {
+	height: 280rpx;
+	border-radius: 20rpx;
+	overflow: hidden;
+}
+
+.banner-item {
+	width: 100%;
+	height: 280rpx;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: 0 32rpx;
+}
+
+.banner-emoji {
+	font-size: 80rpx;
+	margin-right: 24rpx;
+}
+
+.banner-info {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+.banner-title {
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #ffffff;
+	margin-bottom: 8rpx;
+}
+
+.banner-sub {
+	font-size: 24rpx;
+	color: rgba(255, 255, 255, 0.8);
+}
+
+.banner-badge {
+	background-color: rgba(255, 255, 255, 0.2);
+	border-radius: 16rpx;
+	padding: 12rpx 20rpx;
+}
+
+.banner-badge text {
+	font-size: 22rpx;
+	color: #ffffff;
+}
+
+.stats-row {
+	display: flex;
+	flex-direction: row;
+	background-color: #16213e;
+	border-radius: 20rpx;
+	padding: 32rpx 0;
+	margin-bottom: 24rpx;
+}
+
+.stat-card {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.stat-num {
+	font-size: 36rpx;
+	font-weight: 700;
+	color: #e94560;
+	margin-bottom: 8rpx;
+}
+
+.stat-label {
+	font-size: 24rpx;
+	color: #a0a0c0;
+}
+
+.section {
+	background-color: #16213e;
+	border-radius: 20rpx;
+	padding: 28rpx;
+	margin-bottom: 24rpx;
+}
+
+.section-header {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 24rpx;
+}
+
+.section-title {
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #ffffff;
+}
+
+.section-more {
+	font-size: 26rpx;
+	color: #e94560;
+}
+
+.band-scroll {
+	white-space: nowrap;
+}
+
+.band-card {
+	display: inline-flex;
+	flex-direction: column;
+	align-items: center;
+	width: 180rpx;
+	margin-right: 20rpx;
+	vertical-align: top;
+}
+
+.band-avatar {
+	width: 120rpx;
+	height: 120rpx;
+	border-radius: 50%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 16rpx;
+}
+
+.band-emoji {
+	font-size: 48rpx;
+}
+
+.band-name {
+	font-size: 26rpx;
+	font-weight: 600;
+	color: #ffffff;
+	text-align: center;
+	margin-bottom: 8rpx;
+}
+
+.band-style {
+	font-size: 22rpx;
+	color: #5a5a8a;
+	text-align: center;
+	margin-bottom: 16rpx;
+}
+
+.band-follow-btn {
+	background-color: #e94560;
+	border-radius: 28rpx;
+	padding: 12rpx 24rpx;
+}
+
+.band-follow-btn text {
+	font-size: 24rpx;
+	color: #ffffff;
+}
+
+.activity-list {
+	display: flex;
+	flex-direction: column;
+	gap: 24rpx;
+}
+
+.activity-card {
+	display: flex;
+	flex-direction: row;
+	background-color: #0d0d1f;
+	border-radius: 16rpx;
+	overflow: hidden;
+}
+
+.activity-cover {
+	width: 200rpx;
+	height: 160rpx;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+.activity-emoji {
+	font-size: 48rpx;
+}
+
+.activity-status {
+	position: absolute;
+	bottom: 12rpx;
+	right: 12rpx;
+	border-radius: 12rpx;
+	padding: 8rpx 16rpx;
+}
+
+.activity-status text {
+	font-size: 20rpx;
+	color: #ffffff;
+}
+
+.activity-body {
+	flex: 1;
+	padding: 20rpx;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.activity-title {
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #ffffff;
+	display: block;
+	margin-bottom: 12rpx;
+}
+
+.activity-meta {
+	display: flex;
+	flex-direction: row;
+	gap: 20rpx;
+	margin-bottom: 12rpx;
+}
+
+.meta-item {
+	font-size: 22rpx;
+	color: #a0a0c0;
+}
+
+.activity-footer {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.activity-price {
+	display: flex;
+	flex-direction: row;
+	align-items: baseline;
+}
+
+.price-text {
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #e94560;
+}
+
+.price-sub {
+	font-size: 22rpx;
+	color: #5a5a8a;
+	margin-left: 8rpx;
+}
+
+.signup-btn {
+	background-color: #e94560;
+	border-radius: 28rpx;
+	padding: 12rpx 28rpx;
+}
+
+.signup-btn text {
+	font-size: 24rpx;
+	color: #ffffff;
+}
+
+.signup-btn.disabled {
+	background-color: #333333;
+}
+
+.signup-btn.disabled text {
+	color: #666666;
+}
+
+.bottom-nav {
+	width: 750rpx;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: #0f0f23;
+	display: flex;
+	flex-direction: row;
+	padding: 12rpx 0 40rpx;
+	border-top: 1rpx solid #1a1a4e;
+}
+
+.nav-item {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4rpx;
+	padding: 8rpx 0;
+}
+
+.nav-item .nav-icon {
+	font-size: 40rpx;
+	color: #5a5a8a;
+	margin-bottom: 4rpx;
+}
+
+.nav-item.active .nav-icon {
+	color: #e94560;
+}
+
+.nav-text {
+	font-size: 22rpx;
+	color: #5a5a8a;
+}
+
+.nav-item.active .nav-text {
+	color: #e94560;
+}
+</style>

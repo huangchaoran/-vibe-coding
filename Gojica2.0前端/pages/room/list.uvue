@@ -1,0 +1,305 @@
+<template>
+	<view class="room-list-container">
+		<view class="top-nav">
+			<text class="nav-title">🏠 排练室</text>
+			<view class="nav-right">
+				<text class="nav-icon" @click="goToSearch"></text>
+			</view>
+		</view>
+
+		<scroll-view class="filter-scroll" scroll-x="true">
+			<view class="filter-tags">
+				<view
+					class="filter-tag"
+					v-for="city in cities"
+					:key="city.value"
+					:class="{ active: currentCity === city.value }"
+					@click="selectCity(city.value)"
+				>
+					<text>{{ city.label }}</text>
+				</view>
+			</view>
+		</scroll-view>
+
+		<scroll-view class="content-area" scroll-y="true">
+			<view class="room-list">
+				<view class="room-card" v-for="room in rooms" :key="room.id" @click="goToDetail(room.id)">
+					<view class="room-cover" :style="{ background: getRoomGradient() }">
+						<text class="room-emoji"></text>
+						<view class="available-badge" v-if="room.isAvailable">
+							<text>可预约</text>
+						</view>
+					</view>
+					<view class="room-body">
+						<text class="room-name">{{ room.name }}</text>
+						<view class="room-meta">
+							<text class="meta-item"> {{ room.location }}</text>
+							<text class="meta-item">👥 {{ room.capacity }}人</text>
+						</view>
+						<view class="room-footer">
+							<view class="room-price">
+								<text class="price">¥{{ room.price_per_hour }}</text>
+								<text class="price-unit">/小时</text>
+							</view>
+							<view class="book-btn" @click.stop="bookRoom(room.id)">
+								<text>立即预约</text>
+							</view>
+						</view>
+					</view>
+				</view>
+			</view>
+
+			<view class="empty-state" v-if="rooms.length === 0">
+				<text class="empty-icon">🏠</text>
+				<text class="empty-text">暂无排练室</text>
+			</view>
+		</scroll-view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, onMounted } from 'vue'
+import { roomApi } from '../../common/utils/api.uts'
+
+const cities = ref([
+	{ label: '全部', value: '' },
+	{ label: '北京', value: 'beijing' },
+	{ label: '上海', value: 'shanghai' },
+	{ label: '成都', value: 'chengdu' }
+])
+const currentCity = ref('')
+const rooms = ref<any[]>([])
+
+const getRoomGradient = (): string => {
+	return 'linear-gradient(135deg, #16213e, #0f4a8a)'
+}
+
+const loadRooms = async () => {
+	try {
+		const params: any = {}
+		if (currentCity.value) {
+			params.city = currentCity.value
+		}
+
+		const res = await roomApi.getList(params)
+		if (res && res.code === 1000) {
+			rooms.value = res.data?.list || []
+		}
+	} catch (e) {
+		console.error('Load rooms error:', e)
+		uni.showToast({ title: '加载失败', icon: 'none' })
+	}
+}
+
+const selectCity = (city: string) => {
+	currentCity.value = city
+	loadRooms()
+}
+
+const goToDetail = (id: number) => {
+	uni.showToast({ title: '排练室详情开发中', icon: 'none' })
+}
+
+const goToSearch = () => {
+	uni.navigateTo({ url: '/pages/search/index' })
+}
+
+const bookRoom = (id: number) => {
+	uni.showToast({ title: '预约功能开发中', icon: 'none' })
+}
+
+onMounted(() => {
+	loadRooms()
+})
+</script>
+
+<style>
+.room-list-container {
+	width: 750rpx;
+	min-height: 100vh;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: column;
+}
+
+.top-nav {
+	width: 750rpx;
+	height: 88rpx;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 28rpx;
+	border-bottom: 1rpx solid #1a1a4e;
+}
+
+.nav-title {
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #ffffff;
+}
+
+.nav-right {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.nav-icon {
+	font-size: 36rpx;
+}
+
+.filter-scroll {
+	width: 750rpx;
+	background-color: #0d0d1f;
+	border-bottom: 1rpx solid #1a1a4e;
+}
+
+.filter-tags {
+	display: flex;
+	flex-direction: row;
+	padding: 20rpx 28rpx;
+	white-space: nowrap;
+}
+
+.filter-tag {
+	background-color: #16213e;
+	color: #a0a0c0;
+	font-size: 24rpx;
+	padding: 12rpx 24rpx;
+	border-radius: 28rpx;
+	margin-right: 16rpx;
+	border: 1rpx solid #1a1a4e;
+}
+
+.filter-tag.active {
+	background-color: #e94560;
+	color: #ffffff;
+	border-color: #e94560;
+}
+
+.content-area {
+	flex: 1;
+	width: 750rpx;
+	padding: 28rpx;
+}
+
+.room-list {
+	display: flex;
+	flex-direction: column;
+	gap: 24rpx;
+}
+
+.room-card {
+	background-color: #16213e;
+	border-radius: 28rpx;
+	overflow: hidden;
+	border: 1rpx solid #1a1a4e;
+}
+
+.room-cover {
+	width: 100%;
+	height: 220rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+.room-emoji {
+	font-size: 64rpx;
+}
+
+.available-badge {
+	position: absolute;
+	top: 20rpx;
+	right: 20rpx;
+	background-color: #27ae60;
+	padding: 8rpx 16rpx;
+	border-radius: 16rpx;
+}
+
+.available-badge text {
+	font-size: 20rpx;
+	color: #ffffff;
+}
+
+.room-body {
+	padding: 24rpx;
+}
+
+.room-name {
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #ffffff;
+	display: block;
+}
+
+.room-meta {
+	display: flex;
+	flex-direction: row;
+	margin-top: 12rpx;
+}
+
+.meta-item {
+	font-size: 22rpx;
+	color: #a0a0c0;
+	margin-right: 24rpx;
+}
+
+.room-footer {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 16rpx;
+}
+
+.room-price {
+	display: flex;
+	flex-direction: row;
+	align-items: baseline;
+}
+
+.price {
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #e94560;
+}
+
+.price-unit {
+	font-size: 22rpx;
+	color: #a0a0c0;
+	margin-left: 4rpx;
+}
+
+.book-btn {
+	background-color: #e94560;
+	border-radius: 28rpx;
+	padding: 12rpx 32rpx;
+}
+
+.book-btn text {
+	font-size: 24rpx;
+	color: #ffffff;
+}
+
+.empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 100rpx 40rpx;
+}
+
+.empty-icon {
+	font-size: 80rpx;
+}
+
+.empty-text {
+	font-size: 26rpx;
+	color: #5a5a8a;
+	margin-top: 20rpx;
+}
+</style>
+

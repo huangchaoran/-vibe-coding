@@ -1,0 +1,163 @@
+<project_specification>
+  <project_name>Gojica 2.0 - 音乐社交平台</project_name>
+
+  <overview>
+    Gojica 是一个面向音乐爱好者的社交平台，旨在连接音乐人、乐队、场地商家和普通音乐爱好者。
+    平台支持多身份系统（粉丝/音乐人/商家/乐队），提供活动发布、招募信息、商品交易、帖子互动等功能。
+    当前版本 v2.0 采用前后端分离架构，前端使用 UniApp，后端使用 Node.js + Express + Sequelize + MySQL。
+  </overview>
+
+  <technology_stack>
+    <frontend>
+      <framework>UniApp (Vue 3)</framework>
+      <styling>SCSS</styling>
+      <port>前端运行在 127.0.0.1:5173 或配置端口</port>
+    </frontend>
+    <backend>
+      <runtime>Node.js with Express</runtime>
+      <database>MySQL 8.0</database>
+      <orm>Sequelize</orm>
+      <port>后端运行在 127.0.0.1:3000</port>
+    </backend>
+    <communication>
+      <api>RESTful API</api>
+    </communication>
+  </technology_stack>
+
+  <project_structure>
+    <root>
+      Gojica2.0/
+      ├── server/                    # 后端代码
+      │   ├── src/
+      │   │   ├── routes/           # API 路由
+      │   │   ├── models/            # Sequelize 模型
+      │   │   ├── services/          # 业务逻辑
+      │   │   └── middleware/        # 中间件
+      │   ├── tests/                # 后端测试
+      │   ├── package.json
+      │   └── .env                  # 环境配置
+      ├── Gojica2.0前端/            # 前端代码
+      │   ├── pages/                # 页面
+      │   ├── common/               # 公共组件
+      │   ├── static/               # 静态资源
+      │   ├── package.json
+      │   └── playwright.config.js  # Playwright 配置
+      └── harness/                  # 本工作流
+    </root>
+  </project_structure>
+
+  <core_modules>
+    <auth_module>
+      - 微信登录
+      - 开发模式登录（测试用）
+      - Token 刷新机制
+      - 退出登录
+    </auth_module>
+
+    <user_module>
+      - 用户信息管理
+      - 多身份切换（fan/musician/merchant/band）
+      - 身份详情管理
+    </user_module>
+
+    <band_module>
+      - 乐队 CRUD
+      - 乐队详情页
+      - 关注/取消关注乐队
+      - 关注列表
+    </band_module>
+
+    <activity_module>
+      - 活动 CRUD
+      - 活动报名
+      - 报名列表
+    </activity_module>
+
+    <product_module>
+      - 商品 CRUD
+      - 商品详情
+    </product_module>
+
+    <recruitment_module>
+      - 招募信息 CRUD
+      - 招募详情
+    </recruitment_module>
+
+    <post_module>
+      - 帖子发布
+      - 帖子点赞
+      - 帖子评论
+    </post_module>
+
+    <follow_module>
+      - 关注乐队
+      - 取消关注
+      - 关注状态同步
+    </follow_module>
+  </core_modules>
+
+  <existing_test_files>
+    <backend_tests>
+      - server/comprehensive-test.js
+      - server/test-all-apis.js
+      - server/test-complete.js
+      - server/test-full-integration.js
+    </backend_tests>
+    <frontend_tests>
+      - Gojica2.0前端/integration-test.js
+      - Gojica2.0前端/playwright-integration-test.js
+      - Gojica2.0前端/test-follow-fixed.js
+      - Gojica2.0前端/frontend-verify-test.js
+    </frontend_tests>
+  </existing_test_files>
+
+  <api_endpoints>
+    <auth>
+      - POST /api/v1/auth/login
+      - POST /api/v1/auth/register
+      - POST /api/v1/auth/refresh
+      - POST /api/v1/auth/logout
+    </auth>
+    <users>
+      - GET /api/v1/users/:id
+      - PUT /api/v1/users/:id
+      - GET /api/v1/users/:id/identities
+    </users>
+    <bands>
+      - GET /api/v1/bands
+      - POST /api/v1/bands
+      - GET /api/v1/bands/:id
+      - PUT /api/v1/bands/:id
+      - DELETE /api/v1/bands/:id
+      - POST /api/v1/bands/:id/follow
+      - DELETE /api/v1/bands/:id/follow
+      - GET /api/v1/bands/:id/followers
+      - GET /api/v1/bands/followed
+    </bands>
+    <activities>
+      - GET /api/v1/activities
+      - POST /api/v1/activities
+      - GET /api/v1/activities/:id
+      - POST /api/v1/activities/:id/signup
+      - GET /api/v1/activities/:id/signups
+    </activities>
+  </api_endpoints>
+
+  <known_issues>
+    - 关注功能状态不同步：主页显示已关注，详情页不显示
+    - 取消关注逻辑异常：主页已关注乐队再次点击应弹出取消确认
+  </known_issues>
+
+  <success_criteria>
+    <functionality>
+      - 所有 API 接口正常工作
+      - 关注/取消关注状态一致
+      - 活动报名功能正常
+      - 用户身份切换正常
+    </functionality>
+    <testing>
+      - Playwright E2E 测试全部通过
+      - 后端集成测试全部通过
+    </testing>
+  </success_criteria>
+</project_specification>

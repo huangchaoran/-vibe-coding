@@ -1,0 +1,371 @@
+<template>
+	<view class="recruit-list-container">
+		<view class="top-nav">
+			<text class="nav-title">📢 招募</text>
+			<view class="nav-right">
+				<text class="nav-icon" @click="goToPublish">+</text>
+			</view>
+		</view>
+
+		<scroll-view class="filter-scroll" scroll-x="true">
+			<view class="filter-tags">
+				<view
+					class="filter-tag"
+					v-for="inst in instruments"
+					:key="inst.value"
+					:class="{ active: currentInstrument === inst.value }"
+					@click="selectInstrument(inst.value)"
+				>
+					<text>{{ inst.label }}</text>
+				</view>
+			</view>
+		</scroll-view>
+
+		<scroll-view class="content-area" scroll-y="true" @scrolltolower="loadMore">
+			<view class="recruit-list">
+				<view class="recruit-card" v-for="recruit in recruits" :key="recruit.id">
+					<view class="recruit-header">
+						<view class="band-avatar" :style="{ background: getBandGradient(recruit.band?.style) }">
+							<text class="band-emoji">{{ getBandEmoji(recruit.band?.style) }}</text>
+						</view>
+						<view class="recruit-title-info">
+							<text class="recruit-title">{{ recruit.title }}</text>
+							<text class="band-name">{{ recruit.band?.name || '未知乐队' }}</text>
+						</view>
+					</view>
+					<view class="recruit-tags">
+						<view class="tag" v-for="(tag, index) in recruit.tags" :key="index">
+							<text>{{ tag }}</text>
+						</view>
+					</view>
+					<text class="recruit-desc">{{ recruit.description }}</text>
+					<view class="recruit-footer">
+						<view class="apply-btn" @click="applyRecruit(recruit.id)">
+							<text>申请加入</text>
+						</view>
+					</view>
+				</view>
+			</view>
+
+			<view class="loading-more" v-if="loading">
+				<text>加载中..</text>
+			</view>
+			<view class="no-more" v-if="!loading && noMore">
+				<text>没有更多了</text>
+			</view>
+			<view class="empty-state" v-if="!loading && recruits.length === 0">
+				<text class="empty-icon">📢</text>
+				<text class="empty-text">暂无招募信息</text>
+			</view>
+		</scroll-view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, onMounted } from 'vue'
+import { bandApi } from '../../common/utils/api.uts'
+import { INSTRUMENTS } from '../../common/utils/theme'
+
+const instruments = ref([{ label: '全部', value: '' }, ...INSTRUMENTS])
+const currentInstrument = ref('')
+const recruits = ref<any[]>([])
+const page = ref(1)
+const pageSize = 20
+const loading = ref(false)
+const noMore = ref(false)
+
+const getBandGradient = (style: string): string => {
+	const gradients: Record<string, string> = {
+		rock: 'linear-gradient(135deg, #e94560, #8b1a34)',
+		jazz: 'linear-gradient(135deg, #9b59b6, #8e44ad)',
+		pop: 'linear-gradient(135deg, #3498db, #2980b9)',
+		folk: 'linear-gradient(135deg, #27ae60, #2ecc71)'
+	}
+	return gradients[style?.toLowerCase()] || 'linear-gradient(135deg, #e94560, #8b1a34)'
+}
+
+const getBandEmoji = (style: string): string => {
+	const emojis: Record<string, string> = {
+		rock: '',
+		jazz: '',
+		pop: '',
+		folk: ''
+	}
+	return emojis[style?.toLowerCase()] || '🎵'
+}
+
+const loadRecruits = async (reset = false) => {
+	if (loading.value) return
+	if (reset) {
+		page.value = 1
+		noMore.value = false
+		recruits.value = []
+	}
+
+	loading.value = true
+	try {
+		const params: any = {
+			page: page.value,
+			pageSize
+		}
+		if (currentInstrument.value) {
+			params.instrument = currentInstrument.value
+		}
+
+		const res = await bandApi.getList(params)
+		if (res && res.code === 1000) {
+			const list = res.data?.list || []
+			const recruitsData = list.map((band: any) => ({
+				id: band.id,
+				title: `急招${band.style}乐手`,
+				description: band.intro || '暂无描述',
+				band: {
+					id: band.id,
+					name: band.name,
+					style: band.style
+				},
+				tags: [band.style, '有演出经验优先'],
+				status: 'open'
+			}))
+
+			if (reset) {
+				recruits.value = recruitsData
+			} else {
+				recruits.value = [...recruits.value, ...recruitsData]
+			}
+
+			if (list.length < pageSize) {
+				noMore.value = true
+			} else {
+				page.value++
+			}
+		}
+	} catch (e) {
+		console.error('Load recruits error:', e)
+		uni.showToast({ title: '加载失败', icon: 'none' })
+	} finally {
+		loading.value = false
+	}
+}
+
+const selectInstrument = (instrument: string) => {
+	currentInstrument.value = instrument
+	loadRecruits(true)
+}
+
+const loadMore = () => {
+	if (!noMore.value) {
+		loadRecruits(false)
+	}
+}
+
+const applyRecruit = async (id: number) => {
+	try {
+		uni.showToast({ title: '申请功能开发中', icon: 'none' })
+	} catch (e) {
+		uni.showToast({ title: '申请失败', icon: 'none' })
+	}
+}
+
+const goToPublish = () => {
+	uni.showToast({ title: '发布招募开发中', icon: 'none' })
+}
+
+onMounted(() => {
+	loadRecruits(true)
+})
+</script>
+
+<style>
+.recruit-list-container {
+	width: 750rpx;
+	min-height: 100vh;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: column;
+}
+
+.top-nav {
+	width: 750rpx;
+	height: 88rpx;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 28rpx;
+	border-bottom: 1rpx solid #1a1a4e;
+}
+
+.nav-title {
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #ffffff;
+}
+
+.nav-right {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.nav-icon {
+	font-size: 36rpx;
+}
+
+.filter-scroll {
+	width: 750rpx;
+	background-color: #0d0d1f;
+	border-bottom: 1rpx solid #1a1a4e;
+}
+
+.filter-tags {
+	display: flex;
+	flex-direction: row;
+	padding: 20rpx 28rpx;
+	white-space: nowrap;
+}
+
+.filter-tag {
+	background-color: #16213e;
+	color: #a0a0c0;
+	font-size: 24rpx;
+	padding: 12rpx 24rpx;
+	border-radius: 28rpx;
+	margin-right: 16rpx;
+	border: 1rpx solid #1a1a4e;
+}
+
+.filter-tag.active {
+	background-color: #e94560;
+	color: #ffffff;
+	border-color: #e94560;
+}
+
+.content-area {
+	flex: 1;
+	width: 750rpx;
+	padding: 28rpx;
+}
+
+.recruit-list {
+	display: flex;
+	flex-direction: column;
+	gap: 24rpx;
+}
+
+.recruit-card {
+	background-color: #16213e;
+	border-radius: 28rpx;
+	padding: 28rpx;
+	border: 1rpx solid #1a1a4e;
+}
+
+.recruit-header {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin-bottom: 16rpx;
+}
+
+.band-avatar {
+	width: 80rpx;
+	height: 80rpx;
+	border-radius: 20rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.band-emoji {
+	font-size: 36rpx;
+}
+
+.recruit-title-info {
+	flex: 1;
+	margin-left: 20rpx;
+}
+
+.recruit-title {
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #ffffff;
+	display: block;
+}
+
+.band-name {
+	font-size: 22rpx;
+	color: #a0a0c0;
+	display: block;
+	margin-top: 4rpx;
+}
+
+.recruit-tags {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	margin-bottom: 16rpx;
+}
+
+.tag {
+	background-color: rgba(233, 69, 96, 0.15);
+	color: #e94560;
+	font-size: 20rpx;
+	padding: 6rpx 16rpx;
+	border-radius: 16rpx;
+	margin-right: 12rpx;
+	margin-bottom: 8rpx;
+}
+
+.recruit-desc {
+	font-size: 24rpx;
+	color: #a0a0c0;
+	line-height: 1.5;
+	display: block;
+	margin-bottom: 16rpx;
+}
+
+.recruit-footer {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+}
+
+.apply-btn {
+	background-color: #e94560;
+	border-radius: 28rpx;
+	padding: 12rpx 36rpx;
+}
+
+.apply-btn text {
+	font-size: 24rpx;
+	color: #ffffff;
+}
+
+.loading-more,
+.no-more {
+	padding: 32rpx;
+	text-align: center;
+	color: #5a5a8a;
+	font-size: 24rpx;
+}
+
+.empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 100rpx 40rpx;
+}
+
+.empty-icon {
+	font-size: 80rpx;
+}
+
+.empty-text {
+	font-size: 26rpx;
+	color: #5a5a8a;
+	margin-top: 20rpx;
+}
+</style>
+

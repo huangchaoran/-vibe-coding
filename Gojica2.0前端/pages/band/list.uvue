@@ -1,0 +1,367 @@
+<template>
+	<view class="band-list-container">
+		<view class="top-nav">
+			<text class="nav-title"> 乐队</text>
+			<view class="nav-right">
+				<text class="nav-icon" @click="goToSearch"></text>
+				<text class="nav-icon" @click="goToCreate">+</text>
+			</view>
+		</view>
+
+		<scroll-view class="filter-scroll" scroll-x="true">
+			<view class="filter-tags">
+				<view
+					class="filter-tag"
+					v-for="style in styles"
+					:key="style.value"
+					:class="{ active: currentStyle === style.value }"
+					@click="selectStyle(style.value)"
+				>
+					<text>{{ style.label }}</text>
+				</view>
+			</view>
+		</scroll-view>
+
+		<scroll-view class="content-area" scroll-y="true" @scrolltolower="loadMore">
+			<view class="band-list">
+				<view class="band-item" v-for="band in bands" :key="band.id" @click="goToDetail(band.id)">
+					<view class="band-avatar" :style="{ background: getBandGradient(band.style) }">
+						<text class="band-emoji">{{ getBandEmoji(band.style) }}</text>
+					</view>
+					<view class="band-info">
+						<text class="band-name">{{ band.name }}</text>
+						<text class="band-meta">{{ band.style }} · {{ band.member_count || 0 }}名成员</text>
+					</view>
+					<view class="band-tag">
+						<text>{{ band.style }}</text>
+					</view>
+				</view>
+			</view>
+
+			<view class="loading-more" v-if="loading">
+				<text>加载中..</text>
+			</view>
+			<view class="no-more" v-if="!loading && noMore">
+				<text>没有更多了</text>
+			</view>
+		</scroll-view>
+
+		<view class="bottom-nav">
+			<view class="nav-item" @click="switchTab(0)">
+				<text class="nav-icon">🏠</text>
+				<text class="nav-text">首页</text>
+			</view>
+			<view class="nav-item active" @click="switchTab(1)">
+				<text class="nav-icon"></text>
+				<text class="nav-text">乐队</text>
+			</view>
+			<view class="nav-item" @click="switchTab(2)">
+				<text class="nav-icon"></text>
+				<text class="nav-text">广场</text>
+			</view>
+			<view class="nav-item" @click="switchTab(3)">
+				<text class="nav-icon"></text>
+				<text class="nav-text">市场</text>
+			</view>
+			<view class="nav-item" @click="switchTab(4)">
+				<text class="nav-icon"></text>
+				<text class="nav-text">我的</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, onMounted } from 'vue'
+import { bandApi } from '../../common/utils/api.uts'
+import { MUSIC_STYLES } from '../../common/utils/theme'
+
+const styles = ref([{ label: '全部', value: '' }, ...MUSIC_STYLES])
+const currentStyle = ref('')
+const bands = ref<any[]>([])
+const page = ref(1)
+const pageSize = 20
+const loading = ref(false)
+const noMore = ref(false)
+
+const getBandGradient = (style: string): string => {
+	const gradients: Record<string, string> = {
+		rock: 'linear-gradient(135deg, #e94560, #8b1a34)',
+		jazz: 'linear-gradient(135deg, #9b59b6, #8e44ad)',
+		pop: 'linear-gradient(135deg, #3498db, #2980b9)',
+		folk: 'linear-gradient(135deg, #27ae60, #2ecc71)',
+		metal: 'linear-gradient(135deg, #34495e, #2c3e50)',
+		blues: 'linear-gradient(135deg, #f39c12, #e67e22)'
+	}
+	return gradients[style?.toLowerCase()] || 'linear-gradient(135deg, #e94560, #8b1a34)'
+}
+
+const getBandEmoji = (style: string): string => {
+	const emojis: Record<string, string> = {
+		rock: '',
+		jazz: '',
+		pop: '',
+		folk: '',
+		metal: '',
+		blues: ''
+	}
+	return emojis[style?.toLowerCase()] || '🎵'
+}
+
+const loadBands = async (reset = false) => {
+	if (loading.value) return
+	if (reset) {
+		page.value = 1
+		noMore.value = false
+		bands.value = []
+	}
+
+	loading.value = true
+	try {
+		const params: any = {
+			page: page.value,
+			pageSize
+		}
+		if (currentStyle.value) {
+			params.style = currentStyle.value
+		}
+
+		const res = await bandApi.getList(params)
+		if (res && res.code === 1000) {
+			const list = res.data?.list || []
+			if (reset) {
+				bands.value = list
+			} else {
+				bands.value = [...bands.value, ...list]
+			}
+
+			if (list.length < pageSize) {
+				noMore.value = true
+			} else {
+				page.value++
+			}
+		}
+	} catch (e) {
+		console.error('Load bands error:', e)
+		uni.showToast({ title: '加载失败', icon: 'none' })
+	} finally {
+		loading.value = false
+	}
+}
+
+const selectStyle = (style: string) => {
+	currentStyle.value = style
+	loadBands(true)
+}
+
+const loadMore = () => {
+	if (!noMore.value) {
+		loadBands(false)
+	}
+}
+
+const goToDetail = (id: number) => {
+	uni.navigateTo({ url: `/pages/band/detail?id=${id}` })
+}
+
+const goToSearch = () => {
+	uni.navigateTo({ url: '/pages/search/index' })
+}
+
+const goToCreate = () => {
+	uni.navigateTo({ url: '/pages/band/create' })
+}
+
+const switchTab = (index: number) => {
+	const tabs = [
+		'/pages/home/index',
+		'/pages/band/list',
+		'/pages/square/index',
+		'/pages/market/list',
+		'/pages/user/index'
+	]
+	if (index === 1) return
+	uni.switchTab({ url: tabs[index] })
+}
+
+onMounted(() => {
+	loadBands(true)
+})
+</script>
+
+<style>
+.band-list-container {
+	width: 750rpx;
+	min-height: 100vh;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: column;
+}
+
+.top-nav {
+	width: 750rpx;
+	height: 88rpx;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 28rpx;
+	border-bottom: 1rpx solid #1a1a4e;
+}
+
+.nav-title {
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #ffffff;
+}
+
+.nav-right {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.nav-icon {
+	font-size: 36rpx;
+	margin-left: 24rpx;
+}
+
+.filter-scroll {
+	width: 750rpx;
+	background-color: #0d0d1f;
+	border-bottom: 1rpx solid #1a1a4e;
+}
+
+.filter-tags {
+	display: flex;
+	flex-direction: row;
+	padding: 20rpx 28rpx;
+	white-space: nowrap;
+}
+
+.filter-tag {
+	background-color: #16213e;
+	color: #a0a0c0;
+	font-size: 24rpx;
+	padding: 12rpx 24rpx;
+	border-radius: 28rpx;
+	margin-right: 16rpx;
+	border: 1rpx solid #1a1a4e;
+}
+
+.filter-tag.active {
+	background-color: #e94560;
+	color: #ffffff;
+	border-color: #e94560;
+}
+
+.content-area {
+	flex: 1;
+	width: 750rpx;
+	padding-bottom: 100rpx;
+}
+
+.band-list {
+	padding: 0 28rpx;
+}
+
+.band-item {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: 24rpx 0;
+	border-bottom: 1rpx solid #1a1a4e;
+}
+
+.band-avatar {
+	width: 92rpx;
+	height: 92rpx;
+	border-radius: 20rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.band-emoji {
+	font-size: 36rpx;
+}
+
+.band-info {
+	flex: 1;
+	margin-left: 24rpx;
+}
+
+.band-name {
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #ffffff;
+	display: block;
+}
+
+.band-meta {
+	font-size: 24rpx;
+	color: #a0a0c0;
+	display: block;
+	margin-top: 6rpx;
+}
+
+.band-tag {
+	background-color: #16213e;
+	color: #e94560;
+	font-size: 20rpx;
+	padding: 8rpx 16rpx;
+	border-radius: 16rpx;
+	border: 1rpx solid #e94560;
+}
+
+.loading-more,
+.no-more {
+	padding: 32rpx;
+	text-align: center;
+	color: #5a5a8a;
+	font-size: 24rpx;
+}
+
+.bottom-nav {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 100rpx;
+	background-color: #0f0f23;
+	border-top: 1rpx solid #1a1a3e;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.nav-item {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.nav-icon {
+	font-size: 40rpx;
+	color: #5a5a8a;
+}
+
+.nav-text {
+	font-size: 20rpx;
+	color: #5a5a8a;
+	margin-top: 4rpx;
+}
+
+.nav-item.active .nav-icon {
+	color: #e94560;
+}
+
+.nav-item.active .nav-text {
+	color: #e94560;
+}
+</style>
+

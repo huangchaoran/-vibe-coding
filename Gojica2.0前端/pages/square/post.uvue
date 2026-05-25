@@ -1,0 +1,260 @@
+<template>
+	<view class="post-create-container">
+		<view class="top-nav">
+			<text class="nav-btn cancel" @click="cancel">取消</text>
+			<text class="nav-title">发布动态</text>
+			<text class="nav-btn publish" :class="{ disabled: !canPublish }" @click="publish">发布</text>
+		</view>
+
+		<view class="content-area">
+			<textarea class="content-input" v-model="content" placeholder="分享你的音乐故事..." placeholder-class="placeholder"></textarea>
+
+			<view class="images-section">
+				<view class="images-grid">
+					<view class="image-item" v-for="(img, index) in images" :key="index">
+						<text class="image-placeholder">{{ index + 1 }}</text>
+						<view class="remove-btn" @click="removeImage(index)">
+							<text>×</text>
+						</view>
+					</view>
+					<view class="add-image" @click="addImage" v-if="images.length < 9">
+						<text>+</text>
+					</view>
+				</view>
+			</view>
+
+			<view class="options-list">
+				<view class="option-item" @click="addLocation">
+					<text class="option-icon"></text>
+					<text class="option-text">{{ location || '添加位置' }}</text>
+				</view>
+				<view class="option-item" @click="addBand">
+					<text class="option-icon"></text>
+					<text class="option-text">{{ selectedBand || '关联乐队' }}</text>
+				</view>
+				<view class="option-item">
+					<text class="option-icon"></text>
+					<text class="option-text">公开</text>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, computed } from 'vue'
+import { postApi } from '../../common/utils/api.uts'
+
+const content = ref('')
+const images = ref<string[]>([])
+const location = ref('')
+const selectedBand = ref('')
+
+const canPublish = computed(() => {
+	return content.value.trim().length > 0
+})
+
+const addImage = () => {
+	uni.showToast({ title: '图片上传开发中', icon: 'none' })
+}
+
+const removeImage = (index: number) => {
+	images.value.splice(index, 1)
+}
+
+const addLocation = () => {
+	uni.showToast({ title: '位置功能开发中', icon: 'none' })
+}
+
+const addBand = () => {
+	uni.showToast({ title: '关联乐队开发中', icon: 'none' })
+}
+
+const cancel = () => {
+	if (content.value.trim()) {
+		uni.showModal({
+			title: '提示',
+			content: '确定要放弃编辑吗？',
+			success: (res) => {
+				if (res.confirm) {
+					uni.navigateBack()
+				}
+			}
+		})
+	} else {
+		uni.navigateBack()
+	}
+}
+
+const publish = async () => {
+	if (!canPublish.value) {
+		uni.showToast({ title: '请输入内容', icon: 'none' })
+		return
+	}
+
+	try {
+		uni.showLoading({ title: '发布中..' })
+		const res = await postApi.create({
+			content: content.value,
+			images: images.value
+		})
+		uni.hideLoading()
+
+		if (res && (res.code === 1000 || res.code === 1001)) {
+			uni.showToast({ title: '发布成功', icon: 'success' })
+			uni.navigateBack()
+		}
+	} catch (e) {
+		uni.hideLoading()
+		uni.showToast({ title: '发布失败', icon: 'none' })
+	}
+}
+</script>
+
+<style>
+.post-create-container {
+	width: 750rpx;
+	min-height: 100vh;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: column;
+}
+
+.top-nav {
+	width: 750rpx;
+	height: 88rpx;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 28rpx;
+	border-bottom: 1rpx solid #1a1a4e;
+}
+
+.nav-btn {
+	font-size: 28rpx;
+}
+
+.nav-btn.cancel {
+	color: #a0a0c0;
+}
+
+.nav-btn.publish {
+	color: #e94560;
+	font-weight: 600;
+}
+
+.nav-btn.publish.disabled {
+	color: #5a5a8a;
+}
+
+.nav-title {
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #ffffff;
+}
+
+.content-area {
+	flex: 1;
+	padding: 28rpx;
+}
+
+.content-input {
+	width: 100%;
+	min-height: 300rpx;
+	background-color: transparent;
+	font-size: 28rpx;
+	color: #ffffff;
+	line-height: 1.6;
+}
+
+.placeholder {
+	color: #5a5a8a;
+	font-size: 28rpx;
+}
+
+.images-section {
+	margin-top: 24rpx;
+}
+
+.images-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	gap: 16rpx;
+}
+
+.image-item {
+	width: 100%;
+	height: 200rpx;
+	background: linear-gradient(135deg, #1a1a3e, #e94560);
+	border-radius: 16rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+.image-placeholder {
+	font-size: 60rpx;
+	color: rgba(255, 255, 255, 0.3);
+}
+
+.remove-btn {
+	position: absolute;
+	top: -12rpx;
+	right: -12rpx;
+	width: 48rpx;
+	height: 48rpx;
+	background-color: #e94560;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.remove-btn text {
+	font-size: 32rpx;
+	color: #ffffff;
+}
+
+.add-image {
+	width: 100%;
+	height: 200rpx;
+	background-color: #16213e;
+	border-radius: 16rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 2rpx dashed #1a1a4e;
+}
+
+.add-image text {
+	font-size: 80rpx;
+	color: #5a5a8a;
+}
+
+.options-list {
+	margin-top: 32rpx;
+}
+
+.option-item {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: 24rpx 0;
+	border-bottom: 1rpx solid #1a1a4e;
+}
+
+.option-icon {
+	font-size: 28rpx;
+	margin-right: 16rpx;
+}
+
+.option-text {
+	flex: 1;
+	font-size: 28rpx;
+	color: #c0c0e0;
+}
+</style>
+

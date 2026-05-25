@@ -1,0 +1,200 @@
+const BASE_URL = 'http://localhost:3000/api/v1'
+
+type RequestOptions = {
+	url: string;
+	method?: string;
+	data?: any;
+	header?: any;
+}
+
+const request = (options: RequestOptions): Promise<any> => {
+	return new Promise((resolve, reject) => {
+		const token = uni.getStorageSync('token')
+		const headers: any = {
+			'Content-Type': 'application/json',
+			'Authorization': token ? 'Bearer ' + token : ''
+		}
+		
+		uni.request({
+			url: BASE_URL + options.url,
+			method: options.method || 'GET',
+			data: options.data || {},
+			header: headers,
+			success: (res: any) => {
+				if (res.statusCode === 200 || res.statusCode === 201) {
+					resolve(res.data)
+				} else if (res.statusCode === 401) {
+					uni.removeStorageSync('token')
+					uni.removeStorageSync('userInfo')
+					uni.reLaunch({ url: '/pages/login/index' })
+					reject(new Error('未授权，请重新登录'))
+				} else {
+					reject(res.data)
+				}
+			},
+			fail: (err: any) => {
+				reject(err)
+			}
+		})
+	})
+}
+
+const apiGet = (url: string, params?: any): Promise<any> => {
+	if (params) {
+		const queryString = Object.keys(params)
+			.map(key => encodeURIComponent(key) + '=' + encodeURIComponent(params[key]))
+			.join('&')
+		url = url + '?' + queryString
+	}
+	return request({ url, method: 'GET' })
+}
+const apiPost = (url: string, data?: any): Promise<any> => request({ url, method: 'POST', data })
+const apiPut = (url: string, data?: any): Promise<any> => request({ url, method: 'PUT', data })
+const apiDelete = (url: string, data?: any): Promise<any> => request({ url, method: 'DELETE', data })
+
+// ==================== 首页模块 ====================
+export const homeApi = {
+	getHomeData: (): Promise<any> => apiGet('/home'),
+	getBanners: (): Promise<any> => apiGet('/home/banners'),
+	getStats: (): Promise<any> => apiGet('/home/stats'),
+	getBands: (params?: any): Promise<any> => apiGet('/home/bands', params),
+	getActivities: (params?: any): Promise<any> => apiGet('/home/activities', params),
+	getRecruitments: (params?: any): Promise<any> => apiGet('/recruitments', params)
+}
+
+// ==================== 认证模块 ====================
+export const authApi = {
+	login: (code: string, identity?: string): Promise<any> => apiPost('/auth/login', { code: code, identity: identity || 'fan' }),
+	devLogin: (identity?: string): Promise<any> => apiPost('/auth/dev-login', { identity: identity || 'fan' }),
+	refresh: (refreshToken: string): Promise<any> => apiPost('/auth/refresh', { refreshToken: refreshToken }),
+	sendCode: (phone: string): Promise<any> => apiPost('/auth/send-code', { phone: phone }),
+	logout: (): Promise<any> => apiPost('/auth/logout')
+}
+
+// ==================== 用户模块 ====================
+export const userApi = {
+	getUserInfo: (): Promise<any> => apiGet('/users/me'),
+	getProfile: (): Promise<any> => apiGet('/users/me'),
+	updateProfile: (data: any): Promise<any> => apiPut('/users/profile', data),
+	bindIdentity: (identity: string): Promise<any> => apiPost('/users/bind-identity', { identity: identity }),
+	getIdentities: (): Promise<any> => apiGet('/users/identities'),
+	addIdentity: (identity: string): Promise<any> => apiPost('/users/identities/add', { identity: identity }),
+	removeIdentity: (identity: string): Promise<any> => apiPost('/users/identities/remove', { identity: identity }),
+	getStats: (): Promise<any> => apiGet('/users/stats'),
+	getFavorites: (params?: any): Promise<any> => apiGet('/users/favorites', params),
+	toggleFavorite: (targetId: number, targetType: string): Promise<any> => apiPost('/users/favorites/toggle', { target_id: targetId, target_type: targetType }),
+	getActivities: (params?: any): Promise<any> => apiGet('/users/activities', params),
+	getFollows: (params?: any): Promise<any> => apiGet('/users/follows', params),
+	getBookings: (params?: any): Promise<any> => apiGet('/users/bookings', params),
+	createBooking: (data: any): Promise<any> => apiPost('/users/bookings', data),
+	getOrders: (params?: any): Promise<any> => apiGet('/users/orders', params),
+	createOrder: (data: any): Promise<any> => apiPost('/users/orders', data)
+}
+
+// ==================== 乐队模块 ====================
+export const bandApi = {
+	getList: (params?: any): Promise<any> => apiGet('/bands', params),
+	getDetail: (id: number): Promise<any> => apiGet('/bands/' + id),
+	create: (data: any): Promise<any> => apiPost('/bands', data),
+	update: (id: number, data: any): Promise<any> => apiPut('/bands/' + id, data),
+	delete: (id: number): Promise<any> => apiDelete('/bands/' + id),
+	follow: (id: number): Promise<any> => apiPost('/bands/' + id + '/follow'),
+	unfollow: (id: number): Promise<any> => apiDelete('/bands/' + id + '/follow'),
+	getMembers: (id: number): Promise<any> => apiGet('/bands/' + id + '/members'),
+	addMember: (id: number, data: any): Promise<any> => apiPost('/bands/' + id + '/members', data),
+	removeMember: (id: number, memberId: number): Promise<any> => apiDelete('/bands/' + id + '/members/' + memberId),
+	getActivities: (id: number): Promise<any> => apiGet('/bands/' + id + '/activities')
+}
+
+// ==================== 活动模块 ====================
+export const activityApi = {
+	getList: (params?: any): Promise<any> => apiGet('/activities', params),
+	getDetail: (id: number): Promise<any> => apiGet('/activities/' + id),
+	create: (data: any): Promise<any> => apiPost('/activities', data),
+	update: (id: number, data: any): Promise<any> => apiPut('/activities/' + id, data),
+	delete: (id: number): Promise<any> => apiDelete('/activities/' + id),
+	signup: (id: number, data?: any): Promise<any> => apiPost('/activities/' + id + '/signup', data),
+	cancelSignup: (id: number): Promise<any> => apiPost('/activities/' + id + '/cancel'),
+	getSignups: (id: number): Promise<any> => apiGet('/activities/' + id + '/signups'),
+	checkin: (id: number): Promise<any> => apiPost('/activities/' + id + '/checkin'),
+	getUserActivities: (params?: any): Promise<any> => apiGet('/activities/user/activities', params)
+}
+
+// ==================== 动态/帖子模块 ====================
+export const postApi = {
+	getList: (params?: any): Promise<any> => apiGet('/posts', params),
+	getDetail: (id: number): Promise<any> => apiGet('/posts/' + id),
+	create: (data: any): Promise<any> => apiPost('/posts', data),
+	update: (id: number, data: any): Promise<any> => apiPut('/posts/' + id, data),
+	delete: (id: number): Promise<any> => apiDelete('/posts/' + id),
+	like: (id: number): Promise<any> => apiPost('/posts/' + id + '/like'),
+	unlike: (id: number): Promise<any> => apiDelete('/posts/' + id + '/like'),
+	comment: (id: number, data: any): Promise<any> => apiPost('/posts/' + id + '/comment', data),
+	getComments: (postId: number, params?: any): Promise<any> => apiGet('/posts/' + postId + '/comments', params)
+}
+
+// ==================== 搜索模块 ====================
+export const searchApi = {
+	search: (keyword: string, type?: string): Promise<any> => apiGet('/search', { q: keyword, type: type || 'all' })
+}
+
+// ==================== 产品/商品模块 ====================
+export const productApi = {
+	getList: (params?: any): Promise<any> => apiGet('/products', params),
+	getDetail: (id: number): Promise<any> => apiGet('/products/' + id),
+	create: (data: any): Promise<any> => apiPost('/products', data),
+	update: (id: number, data: any): Promise<any> => apiPut('/products/' + id, data),
+	delete: (id: number): Promise<any> => apiDelete('/products/' + id)
+}
+export const marketApi = productApi
+
+// ==================== 招募模块 ====================
+export const recruitApi = {
+	getList: (params?: any): Promise<any> => apiGet('/recruitments', params),
+	getDetail: (id: number): Promise<any> => apiGet('/recruitments/' + id),
+	create: (data: any): Promise<any> => apiPost('/recruitments', data),
+	update: (id: number, data: any): Promise<any> => apiPut('/recruitments/' + id, data),
+	delete: (id: number): Promise<any> => apiDelete('/recruitments/' + id),
+	apply: (id: number, message?: string): Promise<any> => apiPost('/recruitments/' + id + '/apply', { message: message || '' })
+}
+
+// ==================== 房间/练歌房模块 ====================
+export const roomApi = {
+	getList: (params?: any): Promise<any> => apiGet('/rooms', params),
+	getDetail: (id: number): Promise<any> => apiGet('/rooms/' + id),
+	book: (id: number, data: any): Promise<any> => apiPost('/rooms/' + id + '/book', data)
+}
+
+// ==================== 上传模块 ====================
+export const uploadApi = {
+	uploadImage: (filePath: string): Promise<any> => {
+		return new Promise((resolve, reject) => {
+			const token = uni.getStorageSync('token')
+			uni.uploadFile({
+				url: BASE_URL + '/upload/image',
+				filePath: filePath,
+				name: 'file',
+				header: {
+					'Authorization': token ? 'Bearer ' + token : ''
+				},
+				success: (res: any) => {
+					const data = JSON.parse(res.data)
+					if (data.code === 1000 || data.code === 1001) {
+						resolve(data)
+					} else {
+						reject(data)
+					}
+				},
+				fail: (err: any) => reject(err)
+			})
+		})
+	}
+}
+
+// ==================== 默认导出 ====================
+export default {
+	get: apiGet,
+	post: apiPost,
+	put: apiPut,
+	delete: apiDelete
+}
