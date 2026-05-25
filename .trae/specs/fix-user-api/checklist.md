@@ -1,0 +1,6 @@
+- [x] Checkpoint 1: 数据库表结构检查完成，确定问题原因
+- [x] Checkpoint 2: `/users/stats` API 返回200状态码
+- [x] Checkpoint 3: `/users/activities` API 返回200状态码
+- [x] Checkpoint 4: `/users/orders` API 返回200状态码
+- [x] Checkpoint 5: 所有8个用户模块API都返回200状态码
+- [x] Checkpoint 6: 响应数据格式正确，包含必要字段

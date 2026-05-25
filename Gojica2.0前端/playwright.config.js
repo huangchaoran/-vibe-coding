@@ -1,41 +1,32 @@
 // Playwright 配置文件
-const { defineConfig, devices } = require('playwright');
+const { devices } = require('playwright');
 
-module.exports = defineConfig({
-  testDir: './tests',  // 测试文件目录
-  timeout: 30000,     // 测试超时时间
-  retries: 0,          // 失败重试次数
-  
+module.exports = {
+  testDir: './tests',
+  timeout: 30000,
+  retries: 0,
+
   use: {
-    baseURL: 'http://localhost:8080',  // 本地服务器地址
-    headless: false,     // 显示浏览器
+    baseURL: 'http://localhost:5173',
+    headless: false,
     viewport: { width: 375, height: 812 },
-    screenshot: 'only-on-failure',  // 仅在失败时截图
-    video: 'retain-on-failure',     // 保留失败时的视频
-    trace: 'on-first-retry',        // 第一次失败时记录 trace
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+    trace: 'on-first-retry',
   },
 
   projects: [
-    // iPhone X
     {
       name: 'iPhone X',
       use: { ...devices['iPhone X'] },
     },
-    // iPhone 12
     {
       name: 'iPhone 12',
       use: { ...devices['iPhone 12'] },
     },
-    // Pixel 5
     {
       name: 'Pixel 5',
       use: { ...devices['Pixel 5'] },
     },
   ],
-
-  webServer: {
-    command: 'npm run dev:h5',  // 启动 H5 开发服务器
-    port: 8080,
-    reuseExistingServer: !process.env.CI,
-  },
-});
+};

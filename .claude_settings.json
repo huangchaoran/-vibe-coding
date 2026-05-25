@@ -1,0 +1,25 @@
+{
+  "sandbox": {
+    "enabled": false
+  },
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Read(./**)",
+      "Write(./**)",
+      "Edit(./**)",
+      "Glob(./**)",
+      "Grep(./**)",
+      "Bash(*)",
+      "mcp__playwright__playwright_navigate",
+      "mcp__playwright__playwright_screenshot",
+      "mcp__playwright__playwright_click",
+      "mcp__playwright__playwright_fill",
+      "mcp__playwright__playwright_select",
+      "mcp__playwright__playwright_hover",
+      "mcp__playwright__playwright_evaluate",
+      "mcp__playwright__playwright_assert_text",
+      "mcp__playwright__playwright_wait_for_selector"
+    ]
+  }
+}
