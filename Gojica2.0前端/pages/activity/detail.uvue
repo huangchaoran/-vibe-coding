@@ -1,0 +1,531 @@
+﻿﻿<template>
+	<view class="activity-detail-container">
+		<view class="detail-cover" :style="{ background: getActivityGradient(activity.type) }">
+			<text class="cover-emoji">{{ getActivityEmoji(activity.type) }}</text>
+			<view class="back-btn" @click="goBack">
+				<text>></text>
+			</view>
+			<view class="status-badge" :style="{ background: getStatusColor(activity.status) }">
+				<text>{{ getStatusText(activity.status) }}</text>
+			</view>
+		</view>
+
+		<scroll-view class="content-area" scroll-y="true">
+			<view class="detail-content">
+				<view class="activity-info">
+					<text class="activity-title">{{ activity.title }}</text>
+					<view class="activity-tags">
+						<view class="tag">
+							<text>{{ getTypeText(activity.type) }}</text>
+						</view>
+						<view class="tag">
+							<text>{{ activity.price || '免费' }}</text>
+						</view>
+						<view class="tag">
+							<text>{{ activity.current_participants || 0 }}/{{ activity.max_participants }}人</text>
+						</view>
+					</view>
+				</view>
+
+				<view class="divider"></view>
+
+				<view class="detail-rows">
+					<view class="detail-row">
+						<text class="row-icon">📅</text>
+						<view class="row-content">
+							<text class="row-label">活动时间</text>
+							<text class="row-value">{{ formatDateTime(activity.start_time) }} - {{ formatTime(activity.end_time) }}</text>
+						</view>
+					</view>
+					<view class="detail-row">
+						<text class="row-icon">📍</text>
+						<view class="row-content">
+							<text class="row-label">活动地点</text>
+							<text class="row-value">{{ activity.location || '待定' }}</text>
+						</view>
+					</view>
+					<view class="detail-row" v-if="activity.organizer">
+						<text class="row-icon">👤</text>
+						<view class="row-content">
+							<text class="row-label">主办方</text>
+							<text class="row-value">{{ activity.organizer.nickname || '未知' }}</text>
+						</view>
+					</view>
+				</view>
+
+				<view class="divider"></view>
+
+				<view class="section">
+					<text class="section-title">活动介绍</text>
+					<text class="section-content">{{ activity.description || '暂无详细介绍' }}</text>
+				</view>
+
+				<view class="divider"></view>
+
+				<view class="section" v-if="bands.length > 0">
+					<text class="section-title">参与乐队</text>
+					<view class="bands-grid">
+						<view class="band-item" v-for="band in bands" :key="band.id" @click="goToBand(band.id)">
+							<view class="band-avatar" :style="{ background: getBandGradient(band.style) }">
+								<text class="band-emoji">{{ getBandEmoji(band.style) }}</text>
+							</view>
+							<text class="band-name">{{ band.name }}</text>
+						</view>
+					</view>
+				</view>
+			</view>
+		</scroll-view>
+
+		<view class="bottom-action">
+			<view class="action-btn secondary" @click="toggleFavorite">
+				<text>{{ isFavorite ? '❤️ 已收藏' : '🤍 收藏' }}</text>
+			</view>
+			<view class="action-btn primary" @click="signupActivity" v-if="activity.status === 'recruiting' && !isSigned">
+				<text>🎟 立即报名</text>
+			</view>
+			<view class="action-btn disabled" v-else>
+				<text>{{ isSigned ? '已报名' : getStatusText(activity.status) }}</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script setup lang="uts">
+import { ref, onMounted } from 'vue'
+import { activityApi, userApi } from '../../common/utils/api.uts'
+
+const activityId = ref<number>(0)
+const activity = ref<any>({})
+const bands = ref<any[]>([])
+const isFavorite = ref(false)
+const isSigned = ref(false)
+
+const getActivityGradient = (type: string): string => {
+	const gradients: Record<string, string> = {
+		performance: 'linear-gradient(135deg, #e94560, #16213e)',
+		competition: 'linear-gradient(135deg, #f39c12, #16213e)',
+		rehearsal: 'linear-gradient(135deg, #3498db, #16213e)',
+		course: 'linear-gradient(135deg, #9b59b6, #16213e)'
+	}
+	return gradients[type?.toLowerCase()] || 'linear-gradient(135deg, #16213e, #0f4a8a)'
+}
+
+const getActivityEmoji = (type: string): string => {
+	const emojis: Record<string, string> = {
+		performance: '🎤',
+		competition: '🏆',
+		rehearsal: '🎹',
+		course: '📚'
+	}
+	return emojis[type?.toLowerCase()] || '🎵'
+}
+
+const getTypeText = (type: string): string => {
+	const texts: Record<string, string> = {
+		performance: '演出',
+		competition: '比赛',
+		rehearsal: '排练',
+		course: '课程'
+	}
+	return texts[type?.toLowerCase()] || '其他'
+}
+
+const getStatusColor = (status: string): string => {
+	const colors: Record<string, string> = {
+		recruiting: '#e94560',
+		in_progress: '#27ae60',
+		ended: '#5a5a8a'
+	}
+	return colors[status] || '#5a5a8a'
+}
+
+const getStatusText = (status: string): string => {
+	const texts: Record<string, string> = {
+		recruiting: '招募中',
+		in_progress: '进行中',
+		ended: '已结束'
+	}
+	return texts[status] || '未知'
+}
+
+const getBandGradient = (style: string): string => {
+	const gradients: Record<string, string> = {
+		rock: 'linear-gradient(135deg, #e94560, #8b1a34)',
+		jazz: 'linear-gradient(135deg, #9b59b6, #8e44ad)',
+		pop: 'linear-gradient(135deg, #3498db, #2980b9)',
+		folk: 'linear-gradient(135deg, #27ae60, #2ecc71)',
+		metal: 'linear-gradient(135deg, #34495e, #2c3e50)',
+		blues: 'linear-gradient(135deg, #f39c12, #e67e22)'
+	}
+	return gradients[style?.toLowerCase()] || 'linear-gradient(135deg, #e94560, #8b1a34)'
+}
+
+const getBandEmoji = (style: string): string => {
+	const emojis: Record<string, string> = {
+		rock: '🎸',
+		jazz: '🎷',
+		pop: '🎤',
+		folk: '🎻',
+		metal: '🤘',
+		blues: '🎺'
+	}
+	return emojis[style?.toLowerCase()] || '🎵'
+}
+
+const formatDateTime = (dateStr: string): string => {
+	if (!dateStr) return '待定'
+	const date = new Date(dateStr)
+	const year = date.getFullYear()
+	const month = date.getMonth() + 1
+	const day = date.getDate()
+	const hours = date.getHours().toString().padStart(2, '0')
+	const minutes = date.getMinutes().toString().padStart(2, '0')
+	return year + '年' + month + '月' + day + '日 ' + hours + ':' + minutes
+}
+
+const formatTime = (dateStr: string): string => {
+	if (!dateStr) return '待定'
+	const date = new Date(dateStr)
+	const hours = date.getHours().toString().padStart(2, '0')
+	const minutes = date.getMinutes().toString().padStart(2, '0')
+	return hours + ':' + minutes
+}
+
+const loadActivityDetail = async () => {
+	try {
+		uni.showLoading({ title: '加载中..' })
+		const res = await activityApi.getDetail(activityId.value)
+		if (res && res.code === 1000) {
+			activity.value = res.data || {}
+			if (res.data?.band) {
+				bands.value = Array.isArray(res.data.band) ? res.data.band : [res.data.band].filter(Boolean)
+			}
+		}
+		uni.hideLoading()
+	} catch (e) {
+		uni.hideLoading()
+		console.error('Load activity detail error:', e)
+	}
+}
+
+const checkUserSignup = async () => {
+	try {
+		const res = await userApi.getActivities()
+		if (res && res.code === 1000 && res.data) {
+			const list = res.data.list || res.data || []
+			const signed = list.some((a: any) => a.id === activityId.value)
+			isSigned.value = signed
+		}
+	} catch (e) {
+		console.log('Check signup error:', e)
+	}
+}
+
+const checkUserFavorite = async () => {
+	try {
+		const res = await userApi.getFavorites({ type: 'activity' })
+		if (res && res.code === 1000 && res.data) {
+			const list = res.data.list || res.data || []
+			const favorited = list.some((f: any) => f.target_id === activityId.value)
+			isFavorite.value = favorited
+		}
+	} catch (e) {
+		console.log('Check favorite error:', e)
+	}
+}
+
+const toggleFavorite = async () => {
+	try {
+		const res = await userApi.toggleFavorite(activityId.value, 'activity')
+		if (res && (res.code === 1000 || res.code === 1001)) {
+			isFavorite.value = res.data?.favorited ?? true
+			uni.showToast({
+				title: isFavorite.value ? '收藏成功' : '取消收藏',
+				icon: 'success'
+			})
+		}
+	} catch (e: any) {
+		console.log('Favorite error:', e)
+		if (e && e.code === 3005) {
+			isFavorite.value = true
+		}
+		uni.showToast({ title: '操作失败', icon: 'none' })
+	}
+}
+
+const signupActivity = async () => {
+	try {
+		const res = await activityApi.signup(activityId.value)
+		if (res && (res.code === 1000 || res.code === 1001)) {
+			uni.showToast({ title: '报名成功', icon: 'success' })
+			isSigned.value = true
+			loadActivityDetail()
+		}
+	} catch (e: any) {
+		console.log('Signup error:', e)
+		if (e && e.code === 3005 && e.message && e.message.includes('已报名')) {
+			isSigned.value = true
+			uni.showToast({ title: '您已报名该活动', icon: 'none' })
+		} else {
+			uni.showToast({ title: '报名失败', icon: 'none' })
+		}
+	}
+}
+
+const goToBand = (id: number) => {
+	uni.navigateTo({ url: '/pages/band/detail?id=' + id })
+}
+
+const goBack = () => {
+	uni.navigateBack()
+}
+
+onMounted(() => {
+	const pages = getCurrentPages()
+	if (pages.length > 0) {
+		const currentPage = pages[pages.length - 1] as any
+		if (currentPage.options && currentPage.options.id) {
+			activityId.value = parseInt(currentPage.options.id)
+		}
+	}
+
+	if (activityId.value) {
+		loadActivityDetail()
+		checkUserSignup()
+		checkUserFavorite()
+	} else {
+		uni.showToast({ title: '参数错误', icon: 'none' })
+		uni.navigateBack()
+	}
+})
+</script>
+
+<style>
+.activity-detail-container {
+	width: 750rpx;
+	min-height: 100vh;
+	background-color: #0d0d1f;
+	display: flex;
+	flex-direction: column;
+}
+
+.detail-cover {
+	width: 750rpx;
+	height: 360rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+.cover-emoji {
+	font-size: 100rpx;
+}
+
+.back-btn {
+	position: absolute;
+	top: 24rpx;
+	left: 28rpx;
+	width: 64rpx;
+	height: 64rpx;
+	background-color: rgba(0, 0, 0, 0.4);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.back-btn text {
+	font-size: 32rpx;
+	color: #ffffff;
+}
+
+.status-badge {
+	position: absolute;
+	top: 24rpx;
+	right: 28rpx;
+	padding: 12rpx 24rpx;
+	border-radius: 24rpx;
+}
+
+.status-badge text {
+	font-size: 24rpx;
+	color: #ffffff;
+}
+
+.content-area {
+	flex: 1;
+	width: 750rpx;
+	padding-bottom: 120rpx;
+}
+
+.detail-content {
+	padding: 32rpx 28rpx;
+}
+
+.activity-info {
+	margin-bottom: 24rpx;
+}
+
+.activity-title {
+	font-size: 40rpx;
+	font-weight: 700;
+	color: #ffffff;
+	display: block;
+}
+
+.activity-tags {
+	display: flex;
+	flex-direction: row;
+	margin-top: 16rpx;
+}
+
+.tag {
+	background-color: rgba(233, 69, 96, 0.15);
+	color: #e94560;
+	font-size: 22rpx;
+	padding: 8rpx 20rpx;
+	border-radius: 20rpx;
+	margin-right: 16rpx;
+}
+
+.divider {
+	height: 1rpx;
+	background-color: #1a1a4e;
+	margin: 24rpx 0;
+}
+
+.detail-rows {
+	display: flex;
+	flex-direction: column;
+}
+
+.detail-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin-bottom: 20rpx;
+}
+
+.row-icon {
+	font-size: 28rpx;
+	margin-right: 16rpx;
+}
+
+.row-content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+.row-label {
+	font-size: 22rpx;
+	color: #5a5a8a;
+}
+
+.row-value {
+	font-size: 28rpx;
+	color: #ffffff;
+	margin-top: 4rpx;
+}
+
+.section {
+	margin-bottom: 24rpx;
+}
+
+.section-title {
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #ffffff;
+	display: block;
+	margin-bottom: 16rpx;
+}
+
+.section-content {
+	font-size: 28rpx;
+	color: #a0a0c0;
+	line-height: 1.6;
+}
+
+.bands-grid {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 24rpx;
+}
+
+.band-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.band-avatar {
+	width: 80rpx;
+	height: 80rpx;
+	border-radius: 20rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.band-emoji {
+	font-size: 32rpx;
+}
+
+.band-name {
+	font-size: 22rpx;
+	color: #a0a0c0;
+	margin-top: 8rpx;
+}
+
+.bottom-action {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	padding: 24rpx 28rpx;
+	background-color: #0f0f23;
+	border-top: 1rpx solid #1a1a3e;
+	display: flex;
+	flex-direction: row;
+	gap: 20rpx;
+}
+
+.action-btn {
+	flex: 1;
+	border-radius: 40rpx;
+	padding: 24rpx;
+	text-align: center;
+}
+
+.action-btn text {
+	font-size: 28rpx;
+	font-weight: 600;
+}
+
+.action-btn.secondary {
+	background-color: #16213e;
+	border: 1rpx solid #e94560;
+}
+
+.action-btn.secondary text {
+	color: #e94560;
+}
+
+.action-btn.primary {
+	background-color: #e94560;
+}
+
+.action-btn.primary text {
+	color: #ffffff;
+}
+
+.action-btn.disabled {
+	background-color: #333333;
+}
+
+.action-btn.disabled text {
+	color: #666666;
+}
+</style>
