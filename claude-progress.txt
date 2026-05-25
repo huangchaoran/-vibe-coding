@@ -175,3 +175,14 @@ Gojica2.0/
   - activity detail.uvue
   - market detail.uvue
 - All 104/104 features confirmed passing
+---
+
+### Session 4 (2026/05/25 Late Afternoon):
+- Fixed activity cancel signup endpoint path mismatch
+- Changed /activities/:id/signup (DELETE) → /activities/:id/cancel (DELETE)
+- Backend API tests: 69/69 (100%) ✅
+- Backend comprehensive tests: 30/30 (100%) ✅
+- Playwright tests: 12/12 (100%) ✅
+- All 104/104 features passing (100%)
+- Committed fix as: 5358228 Fix F038: Activity cancel signup endpoint path
+
