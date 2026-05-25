@@ -455,7 +455,7 @@
     ],
     "test_file": "server/test-all-apis.js",
     "test_id": "5.5",
-    "passes": false
+    "passes": true
   },
   {
     "id": "F039",
@@ -791,7 +791,7 @@
     ],
     "test_file": "server/test-all-apis.js",
     "test_id": "11.3",
-    "passes": false
+    "passes": true
   },
   {
     "id": "F067",
