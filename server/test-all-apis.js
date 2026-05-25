@@ -267,7 +267,7 @@ async function runAllTests() {
     { id: '5.2', name: 'Activities-详情', path: '/api/v1/activities/1', method: 'GET' },
     { id: '5.3', name: 'Activities-创建', path: '/api/v1/activities', method: 'POST', data: { title: 'E2E测试活动', start_time: '2026-06-01 10:00:00', location: '测试地点' }, auth: true, token: musicianToken },
     { id: '5.4', name: 'Activities-报名', path: '/api/v1/activities/1/signup', method: 'POST', data: { message: '我想参加' }, auth: true, token: fanToken },
-    { id: '5.5', name: 'Activities-取消报名', path: '/api/v1/activities/1/signup', method: 'DELETE', auth: true, token: fanToken },
+    { id: '5.5', name: 'Activities-取消报名', path: '/api/v1/activities/1/cancel', method: 'DELETE', auth: true, token: fanToken },
     { id: '5.6', name: 'Activities-报名列表', path: '/api/v1/activities/1/signups', method: 'GET', auth: true, token: musicianToken },
   ];
   
