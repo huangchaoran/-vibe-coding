@@ -1,0 +1,1284 @@
+[
+  {
+    "id": "F001",
+    "category": "auth",
+    "description": "开发模式登录-粉丝身份 - 用户可以使用fan身份进行开发模式登录获取token",
+    "steps": [
+      "Step 1: POST /api/v1/auth/dev-login with identity='fan'",
+      "Step 2: Verify response contains token and userInfo",
+      "Step 3: Verify token is valid for subsequent API calls"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "1.1",
+    "passes": false
+  },
+  {
+    "id": "F002",
+    "category": "auth",
+    "description": "开发模式登录-音乐人身份 - 用户可以使用musician身份进行开发模式登录",
+    "steps": [
+      "Step 1: POST /api/v1/auth/dev-login with identity='musician'",
+      "Step 2: Verify response contains token and userInfo with musician identity"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "1.2",
+    "passes": false
+  },
+  {
+    "id": "F003",
+    "category": "auth",
+    "description": "微信登录接口 - 用户可以使用微信授权码登录",
+    "steps": [
+      "Step 1: POST /api/v1/auth/login with code and identity",
+      "Step 2: Verify response returns valid login result"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "1.3",
+    "passes": false
+  },
+  {
+    "id": "F004",
+    "category": "auth",
+    "description": "Token刷新机制 - 用户可以在token过期前刷新获取新token",
+    "steps": [
+      "Step 1: POST /api/v1/auth/refresh with valid refreshToken",
+      "Step 2: Verify response returns new token"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "1.4",
+    "passes": false
+  },
+  {
+    "id": "F005",
+    "category": "auth",
+    "description": "发送验证码 - 用户可以请求手机验证码登录",
+    "steps": [
+      "Step 1: POST /api/v1/auth/send-code with phone number",
+      "Step 2: Verify response indicates code sent"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "1.5",
+    "passes": false
+  },
+  {
+    "id": "F006",
+    "category": "auth",
+    "description": "退出登录 - 用户可以登出当前账号",
+    "steps": [
+      "Step 1: POST /api/v1/auth/logout with valid token",
+      "Step 2: Verify token is invalidated"
+    ],
+    "test_file": "server/comprehensive-test.js",
+    "test_id": "logout",
+    "passes": false
+  },
+  {
+    "id": "F007",
+    "category": "home",
+    "description": "首页数据获取 - 首页显示统计数据、热门乐队、近期活动等信息",
+    "steps": [
+      "Step 1: GET /api/v1/home",
+      "Step 2: Verify response contains stats, banners, bands, activities",
+      "Step 3: Verify frontend displays all sections correctly"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "2.1",
+    "passes": false
+  },
+  {
+    "id": "F008",
+    "category": "home",
+    "description": "首页轮播图 - 首页展示活动Banner轮播图",
+    "steps": [
+      "Step 1: GET /api/v1/home/banners",
+      "Step 2: Verify response contains banner list"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "2.2",
+    "passes": false
+  },
+  {
+    "id": "F009",
+    "category": "home",
+    "description": "首页统计数据 - 首页展示平台统计数据",
+    "steps": [
+      "Step 1: GET /api/v1/home/stats",
+      "Step 2: Verify response contains userCount, bandCount, activityCount"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "2.3",
+    "passes": false
+  },
+  {
+    "id": "F010",
+    "category": "home",
+    "description": "首页热门乐队 - 首页展示热门推荐乐队",
+    "steps": [
+      "Step 1: GET /api/v1/home/bands?page=1&pageSize=5",
+      "Step 2: Verify response contains band list with pagination"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "2.4",
+    "passes": false
+  },
+  {
+    "id": "F011",
+    "category": "home",
+    "description": "首页近期活动 - 首页展示近期活动列表",
+    "steps": [
+      "Step 1: GET /api/v1/home/activities?page=1&pageSize=5",
+      "Step 2: Verify response contains upcoming activities"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "2.5",
+    "passes": false
+  },
+  {
+    "id": "F012",
+    "category": "user",
+    "description": "获取个人资料 - 用户可以查看自己的个人资料",
+    "steps": [
+      "Step 1: GET /api/v1/users/me with auth token",
+      "Step 2: Verify response contains user profile data"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "3.1",
+    "passes": false
+  },
+  {
+    "id": "F013",
+    "category": "user",
+    "description": "更新个人资料 - 用户可以修改自己的个人资料",
+    "steps": [
+      "Step 1: PUT /api/v1/users/profile with updated data",
+      "Step 2: Verify response confirms update"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "3.2",
+    "passes": false
+  },
+  {
+    "id": "F014",
+    "category": "user",
+    "description": "绑定身份 - 用户可以绑定新的身份（fan/musician/merchant/band）",
+    "steps": [
+      "Step 1: POST /api/v1/users/bind-identity with identity type",
+      "Step 2: Verify identity is bound to user account"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "3.3",
+    "passes": false
+  },
+  {
+    "id": "F015",
+    "category": "user",
+    "description": "获取身份列表 - 用户可以查看自己绑定的所有身份",
+    "steps": [
+      "Step 1: GET /api/v1/users/identities",
+      "Step 2: Verify response contains all user identities"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "3.4",
+    "passes": false
+  },
+  {
+    "id": "F016",
+    "category": "user",
+    "description": "添加身份 - 用户可以添加新的身份类型",
+    "steps": [
+      "Step 1: POST /api/v1/users/identities/add with identity",
+      "Step 2: Verify new identity is added"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "3.5",
+    "passes": false
+  },
+  {
+    "id": "F017",
+    "category": "user",
+    "description": "移除身份 - 用户可以移除已绑定的身份",
+    "steps": [
+      "Step 1: POST /api/v1/users/identities/remove with identity",
+      "Step 2: Verify identity is removed from user account"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "3.6",
+    "passes": false
+  },
+  {
+    "id": "F018",
+    "category": "user",
+    "description": "用户统计信息 - 获取用户的关注数、粉丝数等统计数据",
+    "steps": [
+      "Step 1: GET /api/v1/users/stats with auth token",
+      "Step 2: Verify response contains followersCount, followingCount, etc."
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "3.7",
+    "passes": false
+  },
+  {
+    "id": "F019",
+    "category": "user",
+    "description": "收藏列表 - 用户可以查看自己的收藏列表",
+    "steps": [
+      "Step 1: GET /api/v1/users/favorites with auth token",
+      "Step 2: Verify response contains favorited bands/activities"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "3.8",
+    "passes": false
+  },
+  {
+    "id": "F020",
+    "category": "user",
+    "description": "切换收藏状态 - 用户可以收藏或取消收藏乐队/活动",
+    "steps": [
+      "Step 1: POST /api/v1/users/favorites/toggle with targetId and targetType",
+      "Step 2: Verify favorite status toggled correctly"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "3.9",
+    "passes": false
+  },
+  {
+    "id": "F021",
+    "category": "user",
+    "description": "用户活动列表 - 用户可以查看自己参与的活动",
+    "steps": [
+      "Step 1: GET /api/v1/users/activities with auth token",
+      "Step 2: Verify response contains signed up activities"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "3.10",
+    "passes": false
+  },
+  {
+    "id": "F022",
+    "category": "user",
+    "description": "用户关注列表 - 用户可以查看自己关注的乐队列表",
+    "steps": [
+      "Step 1: GET /api/v1/users/follows with auth token",
+      "Step 2: Verify response contains followed bands"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "3.11",
+    "passes": false
+  },
+  {
+    "id": "F023",
+    "category": "user",
+    "description": "用户订单列表 - 用户可以查看自己的商品订单",
+    "steps": [
+      "Step 1: GET /api/v1/users/orders with auth token",
+      "Step 2: Verify response contains order list"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "3.12",
+    "passes": false
+  },
+  {
+    "id": "F024",
+    "category": "band",
+    "description": "乐队列表 - 用户可以浏览所有乐队列表",
+    "steps": [
+      "Step 1: GET /api/v1/bands?page=1&pageSize=10",
+      "Step 2: Verify response contains band list with pagination"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "4.1",
+    "passes": false
+  },
+  {
+    "id": "F025",
+    "category": "band",
+    "description": "创建乐队 - 音乐人可以创建新乐队",
+    "steps": [
+      "Step 1: POST /api/v1/bands with name, style, intro",
+      "Step 2: Verify band is created with returned band ID"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "4.2",
+    "passes": false
+  },
+  {
+    "id": "F026",
+    "category": "band",
+    "description": "乐队详情页 - 用户可以查看乐队详细信息",
+    "steps": [
+      "Step 1: GET /api/v1/bands/:id",
+      "Step 2: Verify response contains band details with members"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "4.3",
+    "passes": false
+  },
+  {
+    "id": "F027",
+    "category": "band",
+    "description": "更新乐队信息 - 乐队所有者可以更新乐队信息",
+    "steps": [
+      "Step 1: PUT /api/v1/bands/:id with updated band data",
+      "Step 2: Verify band information is updated"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "4.4",
+    "passes": false
+  },
+  {
+    "id": "F028",
+    "category": "band",
+    "description": "关注乐队 - 用户可以关注喜欢的乐队",
+    "steps": [
+      "Step 1: POST /api/v1/bands/:id/follow with auth token",
+      "Step 2: Verify follow relationship is created"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "4.5",
+    "passes": false
+  },
+  {
+    "id": "F029",
+    "category": "band",
+    "description": "乐队成员列表 - 查看乐队的所有成员",
+    "steps": [
+      "Step 1: GET /api/v1/bands/:id/members",
+      "Step 2: Verify response contains member list with roles"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "4.6",
+    "passes": false
+  },
+  {
+    "id": "F030",
+    "category": "band",
+    "description": "添加乐队成员 - 乐队管理者可以添加新成员",
+    "steps": [
+      "Step 1: POST /api/v1/bands/:id/members with userId and role",
+      "Step 2: Verify member is added to band"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "4.7",
+    "passes": false
+  },
+  {
+    "id": "F031",
+    "category": "band",
+    "description": "删除乐队 - 乐队所有者可以删除乐队",
+    "steps": [
+      "Step 1: DELETE /api/v1/bands/:id with auth token",
+      "Step 2: Verify band is deleted or returns proper error"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "4.8",
+    "passes": false
+  },
+  {
+    "id": "F032",
+    "category": "band",
+    "description": "乐队粉丝列表 - 查看乐队的所有粉丝",
+    "steps": [
+      "Step 1: GET /api/v1/bands/:id/followers",
+      "Step 2: Verify response contains follower list"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "band-followers",
+    "passes": false
+  },
+  {
+    "id": "F033",
+    "category": "band",
+    "description": "我关注的乐队列表 - 用户可以查看自己关注的所有乐队",
+    "steps": [
+      "Step 1: GET /api/v1/bands/followed with auth token",
+      "Step 2: Verify response contains followed bands"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "bands-followed",
+    "passes": false
+  },
+  {
+    "id": "F034",
+    "category": "activity",
+    "description": "活动列表 - 用户可以浏览所有活动",
+    "steps": [
+      "Step 1: GET /api/v1/activities?page=1&pageSize=10",
+      "Step 2: Verify response contains activity list with pagination"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "5.1",
+    "passes": false
+  },
+  {
+    "id": "F035",
+    "category": "activity",
+    "description": "活动详情页 - 用户可以查看活动详细信息",
+    "steps": [
+      "Step 1: GET /api/v1/activities/:id",
+      "Step 2: Verify response contains activity details"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "5.2",
+    "passes": false
+  },
+  {
+    "id": "F036",
+    "category": "activity",
+    "description": "创建活动 - 音乐人可以创建新活动",
+    "steps": [
+      "Step 1: POST /api/v1/activities with title, start_time, location",
+      "Step 2: Verify activity is created successfully"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "5.3",
+    "passes": false
+  },
+  {
+    "id": "F037",
+    "category": "activity",
+    "description": "活动报名 - 用户可以报名参加活动",
+    "steps": [
+      "Step 1: POST /api/v1/activities/:id/signup with message",
+      "Step 2: Verify signup is recorded"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "5.4",
+    "passes": false
+  },
+  {
+    "id": "F038",
+    "category": "activity",
+    "description": "取消活动报名 - 用户可以取消已报名活动",
+    "steps": [
+      "Step 1: DELETE /api/v1/activities/:id/signup",
+      "Step 2: Verify signup is cancelled"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "5.5",
+    "passes": false
+  },
+  {
+    "id": "F039",
+    "category": "activity",
+    "description": "活动报名列表 - 活动组织者可以查看报名列表",
+    "steps": [
+      "Step 1: GET /api/v1/activities/:id/signups",
+      "Step 2: Verify response contains signup list"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "5.6",
+    "passes": false
+  },
+  {
+    "id": "F040",
+    "category": "post",
+    "description": "帖子列表 - 用户可以浏览广场帖子列表",
+    "steps": [
+      "Step 1: GET /api/v1/posts?page=1&pageSize=10",
+      "Step 2: Verify response contains post list with pagination"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "6.1",
+    "passes": false
+  },
+  {
+    "id": "F041",
+    "category": "post",
+    "description": "帖子详情 - 用户可以查看帖子详细内容",
+    "steps": [
+      "Step 1: GET /api/v1/posts/:id",
+      "Step 2: Verify response contains post with comments count"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "6.2",
+    "passes": false
+  },
+  {
+    "id": "F042",
+    "category": "post",
+    "description": "发布帖子 - 用户可以发布动态帖子",
+    "steps": [
+      "Step 1: POST /api/v1/posts with content",
+      "Step 2: Verify post is created and returned"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "6.3",
+    "passes": false
+  },
+  {
+    "id": "F043",
+    "category": "post",
+    "description": "帖子点赞 - 用户可以点赞帖子",
+    "steps": [
+      "Step 1: POST /api/v1/posts/:id/like",
+      "Step 2: Verify like is recorded"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "6.4",
+    "passes": false
+  },
+  {
+    "id": "F044",
+    "category": "post",
+    "description": "帖子评论列表 - 用户可以查看帖子的所有评论",
+    "steps": [
+      "Step 1: GET /api/v1/posts/:id/comments",
+      "Step 2: Verify response contains comment list"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "6.5",
+    "passes": false
+  },
+  {
+    "id": "F045",
+    "category": "post",
+    "description": "帖子添加评论 - 用户可以对帖子进行评论",
+    "steps": [
+      "Step 1: POST /api/v1/posts/:id/comments with content",
+      "Step 2: Verify comment is added"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "6.6",
+    "passes": false
+  },
+  {
+    "id": "F046",
+    "category": "post",
+    "description": "删除评论 - 用户可以删除自己的评论",
+    "steps": [
+      "Step 1: DELETE /api/v1/posts/:id/comments/:commentId",
+      "Step 2: Verify comment is deleted"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "6.7",
+    "passes": false
+  },
+  {
+    "id": "F047",
+    "category": "post",
+    "description": "删除帖子 - 用户可以删除自己的帖子",
+    "steps": [
+      "Step 1: DELETE /api/v1/posts/:id",
+      "Step 2: Verify post is deleted"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "6.8",
+    "passes": false
+  },
+  {
+    "id": "F048",
+    "category": "product",
+    "description": "商品列表 - 用户可以浏览市场商品列表",
+    "steps": [
+      "Step 1: GET /api/v1/products?page=1&pageSize=10",
+      "Step 2: Verify response contains product list"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "7.1",
+    "passes": false
+  },
+  {
+    "id": "F049",
+    "category": "product",
+    "description": "商品详情 - 用户可以查看商品详细信息",
+    "steps": [
+      "Step 1: GET /api/v1/products/:id",
+      "Step 2: Verify response contains product details"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "7.2",
+    "passes": false
+  },
+  {
+    "id": "F050",
+    "category": "product",
+    "description": "创建商品 - 商家可以发布新商品",
+    "steps": [
+      "Step 1: POST /api/v1/products with title, price, description",
+      "Step 2: Verify product is created"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "7.3",
+    "passes": false
+  },
+  {
+    "id": "F051",
+    "category": "product",
+    "description": "更新商品 - 商家可以更新商品信息",
+    "steps": [
+      "Step 1: PUT /api/v1/products/:id with updated data",
+      "Step 2: Verify product is updated"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "7.4",
+    "passes": false
+  },
+  {
+    "id": "F052",
+    "category": "product",
+    "description": "删除商品 - 商家可以删除商品",
+    "steps": [
+      "Step 1: DELETE /api/v1/products/:id",
+      "Step 2: Verify product is deleted"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "7.5",
+    "passes": false
+  },
+  {
+    "id": "F053",
+    "category": "recruitment",
+    "description": "招募列表 - 用户可以浏览招募信息列表",
+    "steps": [
+      "Step 1: GET /api/v1/recruitments?page=1&pageSize=10",
+      "Step 2: Verify response contains recruitment list"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "8.1",
+    "passes": false
+  },
+  {
+    "id": "F054",
+    "category": "recruitment",
+    "description": "招募详情 - 用户可以查看招募详细信息",
+    "steps": [
+      "Step 1: GET /api/v1/recruitments/:id",
+      "Step 2: Verify response contains recruitment details"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "8.2",
+    "passes": false
+  },
+  {
+    "id": "F055",
+    "category": "recruitment",
+    "description": "发布招募 - 乐队可以发布乐手招募信息",
+    "steps": [
+      "Step 1: POST /api/v1/recruitments with title, instrument",
+      "Step 2: Verify recruitment is created"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "8.3",
+    "passes": false
+  },
+  {
+    "id": "F056",
+    "category": "recruitment",
+    "description": "更新招募 - 招募者可以更新招募信息",
+    "steps": [
+      "Step 1: PUT /api/v1/recruitments/:id with updated data",
+      "Step 2: Verify recruitment is updated"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "8.4",
+    "passes": false
+  },
+  {
+    "id": "F057",
+    "category": "recruitment",
+    "description": "删除招募 - 招募者可以删除招募信息",
+    "steps": [
+      "Step 1: DELETE /api/v1/recruitments/:id",
+      "Step 2: Verify recruitment is deleted"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "8.5",
+    "passes": false
+  },
+  {
+    "id": "F058",
+    "category": "recruitment",
+    "description": "申请招募 - 用户可以申请加入乐队",
+    "steps": [
+      "Step 1: POST /api/v1/recruitments/:id/apply with message",
+      "Step 2: Verify application is submitted"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "8.6",
+    "passes": false
+  },
+  {
+    "id": "F059",
+    "category": "room",
+    "description": "排练室列表 - 用户可以浏览排练室列表",
+    "steps": [
+      "Step 1: GET /api/v1/rooms?page=1&pageSize=10",
+      "Step 2: Verify response contains room list"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "9.1",
+    "passes": false
+  },
+  {
+    "id": "F060",
+    "category": "room",
+    "description": "排练室详情 - 用户可以查看排练室详细信息",
+    "steps": [
+      "Step 1: GET /api/v1/rooms/:id",
+      "Step 2: Verify response contains room details"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "9.2",
+    "passes": false
+  },
+  {
+    "id": "F061",
+    "category": "room",
+    "description": "创建排练室 - 商家可以发布排练室信息",
+    "steps": [
+      "Step 1: POST /api/v1/rooms with name, address, facilities",
+      "Step 2: Verify room is created"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "9.3",
+    "passes": false
+  },
+  {
+    "id": "F062",
+    "category": "room",
+    "description": "预约排练室 - 用户可以预约排练室时间段",
+    "steps": [
+      "Step 1: POST /api/v1/rooms/:id/book with date",
+      "Step 2: Verify booking is recorded"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "9.4",
+    "passes": false
+  },
+  {
+    "id": "F063",
+    "category": "search",
+    "description": "搜索功能 - 用户可以搜索乐队、活动、商品等",
+    "steps": [
+      "Step 1: GET /api/v1/search?q=keyword&type=band",
+      "Step 2: Verify response contains matching results"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "10.1",
+    "passes": false
+  },
+  {
+    "id": "F064",
+    "category": "upload",
+    "description": "图片上传 - 用户可以上传图片",
+    "steps": [
+      "Step 1: POST /api/v1/upload/image with image data",
+      "Step 2: Verify image is uploaded and URL returned"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "11.1",
+    "passes": false
+  },
+  {
+    "id": "F065",
+    "category": "upload",
+    "description": "音频上传 - 用户可以上传音频文件",
+    "steps": [
+      "Step 1: POST /api/v1/upload/audio with audio data",
+      "Step 2: Verify audio is uploaded and URL returned"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "11.2",
+    "passes": false
+  },
+  {
+    "id": "F066",
+    "category": "upload",
+    "description": "视频上传 - 用户可以上传视频文件",
+    "steps": [
+      "Step 1: POST /api/v1/upload/video with video data",
+      "Step 2: Verify video is uploaded and URL returned"
+    ],
+    "test_file": "server/test-all-apis.js",
+    "test_id": "11.3",
+    "passes": false
+  },
+  {
+    "id": "F067",
+    "category": "frontend",
+    "description": "前端-首页加载 - 首页正确显示数据",
+    "steps": [
+      "Step 1: Navigate to homepage",
+      "Step 2: Verify page loads with stats, bands, activities",
+      "Step 3: Verify content length > 50"
+    ],
+    "test_file": "Gojica2.0前端/frontend-verify-test.js",
+    "test_id": "1",
+    "passes": false
+  },
+  {
+    "id": "F068",
+    "category": "frontend",
+    "description": "前端-登录页显示 - 登录页正确显示登录按钮和文字",
+    "steps": [
+      "Step 1: Navigate to /pages/login/index",
+      "Step 2: Verify login page has content and login text"
+    ],
+    "test_file": "Gojica2.0前端/frontend-verify-test.js",
+    "test_id": "2",
+    "passes": false
+  },
+  {
+    "id": "F069",
+    "category": "frontend",
+    "description": "前端-乐队列表页 - 乐队列表页显示乐队数据",
+    "steps": [
+      "Step 1: Navigate to /pages/band/list",
+      "Step 2: Verify page displays band list with relevant text"
+    ],
+    "test_file": "Gojica2.0前端/frontend-verify-test.js",
+    "test_id": "3",
+    "passes": false
+  },
+  {
+    "id": "F070",
+    "category": "frontend",
+    "description": "前端-活动列表页 - 活动列表页正确显示",
+    "steps": [
+      "Step 1: Navigate to /pages/activity/list",
+      "Step 2: Verify page displays activity list"
+    ],
+    "test_file": "Gojica2.0前端/frontend-verify-test.js",
+    "test_id": "4",
+    "passes": false
+  },
+  {
+    "id": "F071",
+    "category": "frontend",
+    "description": "前端-活动详情页 - 活动详情页正确显示",
+    "steps": [
+      "Step 1: Navigate to /pages/activity/detail?id=1",
+      "Step 2: Verify detail page loads with activity info"
+    ],
+    "test_file": "Gojica2.0前端/frontend-verify-test.js",
+    "test_id": "5",
+    "passes": false
+  },
+  {
+    "id": "F072",
+    "category": "frontend",
+    "description": "前端-广场页 - 广场页面正确显示",
+    "steps": [
+      "Step 1: Navigate to /pages/square/index",
+      "Step 2: Verify square page loads with posts"
+    ],
+    "test_file": "Gojica2.0前端/frontend-verify-test.js",
+    "test_id": "6",
+    "passes": false
+  },
+  {
+    "id": "F073",
+    "category": "frontend",
+    "description": "前端-市场页 - 市场页面正确显示",
+    "steps": [
+      "Step 1: Navigate to /pages/market/list",
+      "Step 2: Verify market page loads with products"
+    ],
+    "test_file": "Gojica2.0前端/frontend-verify-test.js",
+    "test_id": "7",
+    "passes": false
+  },
+  {
+    "id": "F074",
+    "category": "frontend",
+    "description": "前端-招募页 - 招募页面正确显示",
+    "steps": [
+      "Step 1: Navigate to /pages/recruit/list",
+      "Step 2: Verify recruitment page loads"
+    ],
+    "test_file": "Gojica2.0前端/frontend-verify-test.js",
+    "test_id": "8",
+    "passes": false
+  },
+  {
+    "id": "F075",
+    "category": "frontend",
+    "description": "前端-排练室页 - 排练室页面正确显示",
+    "steps": [
+      "Step 1: Navigate to /pages/room/list",
+      "Step 2: Verify room page loads"
+    ],
+    "test_file": "Gojica2.0前端/frontend-verify-test.js",
+    "test_id": "9",
+    "passes": false
+  },
+  {
+    "id": "F076",
+    "category": "frontend",
+    "description": "前端-搜索页 - 搜索页面正确显示",
+    "steps": [
+      "Step 1: Navigate to /pages/search/index",
+      "Step 2: Verify search page loads with input"
+    ],
+    "test_file": "Gojica2.0前端/frontend-verify-test.js",
+    "test_id": "10",
+    "passes": false
+  },
+  {
+    "id": "F077",
+    "category": "frontend",
+    "description": "前端-用户中心 - 用户中心页面正确显示",
+    "steps": [
+      "Step 1: Navigate to /pages/user/index",
+      "Step 2: Verify user center page loads"
+    ],
+    "test_file": "Gojica2.0前端/frontend-verify-test.js",
+    "test_id": "11",
+    "passes": false
+  },
+  {
+    "id": "F078",
+    "category": "frontend",
+    "description": "前端-编辑资料页 - 编辑资料页面正确显示",
+    "steps": [
+      "Step 1: Navigate to /pages/user/profile",
+      "Step 2: Verify profile edit page loads"
+    ],
+    "test_file": "Gojica2.0前端/frontend-verify-test.js",
+    "test_id": "12",
+    "passes": false
+  },
+  {
+    "id": "F079",
+    "category": "frontend",
+    "description": "前端-登录流程 - 用户可以成功登录并保持登录态",
+    "steps": [
+      "Step 1: Navigate to login page",
+      "Step 2: Call dev-login API to get token",
+      "Step 3: Inject token to localStorage",
+      "Step 4: Verify login state persists on page reload"
+    ],
+    "test_file": "Gojica2.0前端/frontend-verify-test.js",
+    "test_id": "13",
+    "passes": false
+  },
+  {
+    "id": "F080",
+    "category": "frontend",
+    "description": "前端-关注按钮切换 - 关注按钮点击后状态正确切换",
+    "steps": [
+      "Step 1: Login and go to homepage",
+      "Step 2: Click follow button on band",
+      "Step 3: Verify button text changes from '+ 关注' to '已关注'",
+      "Step 4: Click again to verify toggle back"
+    ],
+    "test_file": "Gojica2.0前端/frontend-verify-test.js",
+    "test_id": "14",
+    "passes": false
+  },
+  {
+    "id": "F081",
+    "category": "frontend",
+    "description": "前端-活动报名交互 - 报名按钮点击后状态正确更新",
+    "steps": [
+      "Step 1: Navigate to activity list",
+      "Step 2: Click signup button",
+      "Step 3: Verify button text changes or success message"
+    ],
+    "test_file": "Gojica2.0前端/frontend-verify-test.js",
+    "test_id": "15",
+    "passes": false
+  },
+  {
+    "id": "F082",
+    "category": "frontend",
+    "description": "前端-TabBar导航 - TabBar切换功能正常",
+    "steps": [
+      "Step 1: Click '乐队' tab",
+      "Step 2: Verify navigation to band page",
+      "Step 3: Click '我的' tab",
+      "Step 4: Verify navigation to user page"
+    ],
+    "test_file": "Gojica2.0前端/frontend-verify-test.js",
+    "test_id": "16",
+    "passes": false
+  },
+  {
+    "id": "F083",
+    "category": "frontend",
+    "description": "前端-页面滚动 - 页面滚动功能正常",
+    "steps": [
+      "Step 1: Navigate to activity list",
+      "Step 2: Scroll page down",
+      "Step 3: Verify page scrolls without errors"
+    ],
+    "test_file": "Gojica2.0前端/frontend-verify-test.js",
+    "test_id": "17",
+    "passes": false
+  },
+  {
+    "id": "F084",
+    "category": "frontend",
+    "description": "前端-页面加载时间 - 首页加载时间在3秒内",
+    "steps": [
+      "Step 1: Measure page load time",
+      "Step 2: Verify loadTime < 3000ms"
+    ],
+    "test_file": "Gojica2.0前端/frontend-verify-test.js",
+    "test_id": "18",
+    "passes": false
+  },
+  {
+    "id": "F085",
+    "category": "performance",
+    "description": "性能测试-首页响应时间 - 首页API响应时间应小于500ms",
+    "steps": [
+      "Step 1: Call GET /api/v1/home",
+      "Step 2: Measure response duration",
+      "Step 3: Verify duration < 500ms"
+    ],
+    "test_file": "server/comprehensive-test.js",
+    "test_id": "performance-1",
+    "passes": false
+  },
+  {
+    "id": "F086",
+    "category": "performance",
+    "description": "性能测试-列表页响应时间 - 列表API响应时间应小于500ms",
+    "steps": [
+      "Step 1: Call GET /api/v1/bands, /api/v1/activities, /api/v1/posts",
+      "Step 2: Measure response durations",
+      "Step 3: Verify all durations < 500ms"
+    ],
+    "test_file": "server/comprehensive-test.js",
+    "test_id": "performance-2",
+    "passes": false
+  },
+  {
+    "id": "F087",
+    "category": "boundary",
+    "description": "边界测试-分页测试 - 大页码和极端分页参数正确处理",
+    "steps": [
+      "Step 1: GET /api/v1/bands?page=100&pageSize=5",
+      "Step 2: GET /api/v1/bands?page=99999&pageSize=100",
+      "Step 3: Verify responses return empty lists gracefully"
+    ],
+    "test_file": "server/comprehensive-test.js",
+    "test_id": "boundary-1",
+    "passes": false
+  },
+  {
+    "id": "F088",
+    "category": "boundary",
+    "description": "边界测试-搜索边界 - 特殊字符和极端搜索词正确处理",
+    "steps": [
+      "Step 1: Search with empty query",
+      "Step 2: Search with very long query (100+ chars)",
+      "Step 3: Search with SQL injection attempt",
+      "Step 4: Verify no crashes and proper handling"
+    ],
+    "test_file": "server/comprehensive-test.js",
+    "test_id": "boundary-2",
+    "passes": false
+  },
+  {
+    "id": "F089",
+    "category": "security",
+    "description": "安全测试-SQL注入防护 - SQL注入攻击被正确拦截",
+    "steps": [
+      "Step 1: Try GET /api/v1/bands/1' OR 1=1",
+      "Step 2: Try GET /api/v1/search?q=1' OR '1'='1",
+      "Step 3: Verify no SQL errors, proper 4xx response"
+    ],
+    "test_file": "server/comprehensive-test.js",
+    "test_id": "security-1",
+    "passes": false
+  },
+  {
+    "id": "F090",
+    "category": "security",
+    "description": "安全测试-XSS防护 - XSS攻击脚本被转义或拒绝",
+    "steps": [
+      "Step 1: POST /api/v1/posts with content='<script>alert(1)</script>'",
+      "Step 2: Verify script tags are escaped or rejected"
+    ],
+    "test_file": "server/comprehensive-test.js",
+    "test_id": "security-2",
+    "passes": false
+  },
+  {
+    "id": "F091",
+    "category": "security",
+    "description": "安全测试-认证拦截 - 未认证请求正确返回401",
+    "steps": [
+      "Step 1: GET /api/v1/users/me without token",
+      "Step 2: Verify 401 Unauthorized response"
+    ],
+    "test_file": "server/comprehensive-test.js",
+    "test_id": "security-3",
+    "passes": false
+  },
+  {
+    "id": "F092",
+    "category": "security",
+    "description": "安全测试-无效Token拦截 - 无效token请求正确返回401",
+    "steps": [
+      "Step 1: GET /api/v1/users/me with invalid token",
+      "Step 2: Verify 401 Unauthorized response"
+    ],
+    "test_file": "server/comprehensive-test.js",
+    "test_id": "security-4",
+    "passes": false
+  },
+  {
+    "id": "F093",
+    "category": "concurrency",
+    "description": "并发测试-10并发请求 - 同时10个请求时系统稳定",
+    "steps": [
+      "Step 1: Send 10 concurrent requests to /api/v1/home",
+      "Step 2: Verify all requests return 200",
+      "Step 3: Verify no crashes or timeouts"
+    ],
+    "test_file": "server/comprehensive-test.js",
+    "test_id": "concurrency-1",
+    "passes": false
+  },
+  {
+    "id": "F094",
+    "category": "validation",
+    "description": "数据验证-空数据拒绝 - 创建时缺少必填字段返回400",
+    "steps": [
+      "Step 1: POST /api/v1/activities with empty body",
+      "Step 2: Verify 400 Bad Request response"
+    ],
+    "test_file": "server/comprehensive-test.js",
+    "test_id": "validation-1",
+    "passes": false
+  },
+  {
+    "id": "F095",
+    "category": "validation",
+    "description": "数据验证-超长数据处理 - 超长数据被截断或拒绝",
+    "steps": [
+      "Step 1: POST /api/v1/activities with title=500 chars",
+      "Step 2: Verify proper handling (truncate or reject)"
+    ],
+    "test_file": "server/comprehensive-test.js",
+    "test_id": "validation-2",
+    "passes": false
+  },
+  {
+    "id": "F096",
+    "category": "validation",
+    "description": "数据验证-负数分页处理 - 负数分页参数正确处理",
+    "steps": [
+      "Step 1: GET /api/v1/bands?page=-1&pageSize=5",
+      "Step 2: Verify proper handling (convert to 1 or reject)"
+    ],
+    "test_file": "server/comprehensive-test.js",
+    "test_id": "validation-3",
+    "passes": false
+  },
+  {
+    "id": "F097",
+    "category": "userflow",
+    "description": "用户流程-关注乐队完整流程 - 关注→刷新→验证状态",
+    "steps": [
+      "Step 1: Login as fan",
+      "Step 2: GET /api/v1/bands to find a band",
+      "Step 3: POST /api/v1/bands/:id/follow",
+      "Step 4: Verify follow state in response"
+    ],
+    "test_file": "server/comprehensive-test.js",
+    "test_id": "userflow-1",
+    "passes": false
+  },
+  {
+    "id": "F098",
+    "category": "userflow",
+    "description": "用户流程-收藏完整流程 - 切换收藏→查看收藏列表",
+    "steps": [
+      "Step 1: Login as fan",
+      "Step 2: POST /api/v1/users/favorites/toggle",
+      "Step 3: GET /api/v1/users/favorites",
+      "Step 4: Verify favorite in list"
+    ],
+    "test_file": "server/comprehensive-test.js",
+    "test_id": "userflow-2",
+    "passes": false
+  },
+  {
+    "id": "F099",
+    "category": "userflow",
+    "description": "用户流程-发布动态完整流程 - 发布→查看→删除",
+    "steps": [
+      "Step 1: Login as fan",
+      "Step 2: POST /api/v1/posts with content",
+      "Step 3: Verify post created successfully"
+    ],
+    "test_file": "server/comprehensive-test.js",
+    "test_id": "userflow-3",
+    "passes": false
+  },
+  {
+    "id": "F100",
+    "category": "userflow",
+    "description": "用户流程-用户资料流程 - 查看→更新→查看统计",
+    "steps": [
+      "Step 1: Login as fan",
+      "Step 2: GET /api/v1/users/me",
+      "Step 3: GET /api/v1/users/stats",
+      "Step 4: Verify stats data returned"
+    ],
+    "test_file": "server/comprehensive-test.js",
+    "test_id": "userflow-4",
+    "passes": false
+  },
+  {
+    "id": "F101",
+    "category": "userflow",
+    "description": "用户流程-搜索流程 - 搜索→查看结果",
+    "steps": [
+      "Step 1: GET /api/v1/search?q=摇滚",
+      "Step 2: Verify results contain relevant bands"
+    ],
+    "test_file": "server/comprehensive-test.js",
+    "test_id": "userflow-5",
+    "passes": false
+  },
+  {
+    "id": "B001",
+    "category": "bugfix",
+    "description": "Bug修复-主页已关注乐队再次点击应显示取消关注，但显示仍为已关注",
+    "steps": [
+      "Step 1: Login as fan user",
+      "Step 2: Go to homepage",
+      "Step 3: Find a band that is already followed",
+      "Step 4: Click the follow button",
+      "Step 5: Verify button should show '取消关注' but shows '已关注'",
+      "Step 6: Fix the toggle logic in band follow button component"
+    ],
+    "test_file": "Gojica2.0前端/test-follow-fixed.js",
+    "test_id": "home-follow-toggle",
+    "passes": false
+  },
+  {
+    "id": "B002",
+    "category": "bugfix",
+    "description": "Bug修复-乐队详情页不显示已关注状态",
+    "steps": [
+      "Step 1: Login as fan user",
+      "Step 2: Navigate to band detail page for a followed band",
+      "Step 3: Verify the follow button shows '已关注'",
+      "Step 4: Fix the state sync between homepage and detail page"
+    ],
+    "test_file": "Gojica2.0前端/test-follow-fixed.js",
+    "test_id": "detail-follow-state",
+    "passes": false
+  },
+  {
+    "id": "B003",
+    "category": "bugfix",
+    "description": "Bug修复-取消关注逻辑异常",
+    "steps": [
+      "Step 1: Login as fan user",
+      "Step 2: Find a followed band",
+      "Step 3: Click unfollow button",
+      "Step 4: Verify unfollow API is called correctly",
+      "Step 5: Verify button state updates to '关注'"
+    ],
+    "test_file": "Gojica2.0前端/test-follow-fixed.js",
+    "test_id": "unfollow-logic",
+    "passes": false
+  }
+]
